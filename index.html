@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python チュートリアル 学習アプリ — 基礎試験対策（3.9 / 第4版準拠）</title>
+<style>
+  :root{
+    --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#FBFCFE;
+    --ink:#1A2433; --ink-soft:#5A6675; --ink-faint:#8A95A4;
+    --line:#E2E7EE; --line-strong:#CFD7E2;
+    --py-blue:#3776AB; --py-blue-deep:#2B5B86; --py-blue-soft:#E8F0F8;
+    --py-yellow:#FFD43B; --py-yellow-soft:#FFF3C4; --py-yellow-deep:#B8860B;
+    --ok:#2E9E6B; --ok-soft:#E4F4EC; --no:#D6504A; --no-soft:#FBE9E8;
+    --code-bg:#1E2430; --code-ink:#E6EAF2; --code-dim:#8893A7; --code-key:#FFD43B; --code-str:#9CDCAA; --code-com:#6B7689;
+    --font-body:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+    --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+    --radius:10px; --shadow:0 1px 2px rgba(26,36,51,.06),0 6px 20px rgba(26,36,51,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font-body);
+    line-height:1.7; -webkit-font-smoothing:antialiased; font-size:15px;
+  }
+  code,pre,.mono{font-family:var(--font-mono)}
+
+  /* ---- top bar ---- */
+  header.top{
+    position:sticky; top:0; z-index:40; background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(1.4) blur(8px); border-bottom:1px solid var(--line);
+  }
+  .top-inner{max-width:1180px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .logo{width:30px;height:30px;border-radius:7px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--py-blue) 0 50%,var(--py-yellow) 50% 100%);
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
+  .brand h1{font-size:15px;margin:0;font-weight:750;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand .sub{font-size:11.5px;color:var(--ink-faint);font-weight:600;letter-spacing:.02em}
+  .top-spacer{flex:1}
+  .overall{display:flex;align-items:center;gap:10px}
+  .overall .pct{font-variant-numeric:tabular-nums;font-weight:800;font-size:13px;color:var(--py-blue-deep)}
+  .obar{width:120px;height:7px;border-radius:99px;background:var(--line);overflow:hidden}
+  .obar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--py-blue),#4f9bd6);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .reset{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-soft);
+    font:inherit;font-size:12px;font-weight:650;padding:6px 11px;border-radius:8px;cursor:pointer}
+  .reset:hover{border-color:var(--no);color:var(--no)}
+
+  /* ---- layout ---- */
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 18px 60px;display:grid;grid-template-columns:288px 1fr;gap:24px;align-items:start}
+
+  /* ---- sidebar (chapter index = exam-weight map) ---- */
+  aside{position:sticky;top:74px}
+  .idx-head{display:flex;align-items:baseline;justify-content:space-between;margin:2px 4px 10px}
+  .idx-head .t{font-size:12px;font-weight:750;letter-spacing:.08em;color:var(--ink-faint);text-transform:uppercase}
+  .idx-head .legend{font-size:11px;color:var(--ink-faint)}
+  .idx-head .legend b{color:var(--py-yellow-deep)}
+  .chaplist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+  .chap{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:9px;
+    width:100%;text-align:left;border:1px solid transparent;background:transparent;
+    padding:8px 9px;border-radius:9px;cursor:pointer;font:inherit;color:var(--ink);transition:background .15s,border-color .15s}
+  .chap:hover{background:var(--surface)}
+  .chap.active{background:var(--surface);border-color:var(--line-strong);box-shadow:var(--shadow)}
+  .chap .no{font-variant-numeric:tabular-nums;font-weight:800;font-size:12.5px;color:var(--py-blue);
+    background:var(--py-blue-soft);border-radius:6px;height:24px;display:grid;place-items:center}
+  .chap.active .no{background:var(--py-blue);color:#fff}
+  .chap .ttl{min-width:0}
+  .chap .ttl .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+  .chap .ttl .wt{font-size:10.5px;color:var(--ink-faint);display:flex;align-items:center;gap:6px;margin-top:1px}
+  .wtbar{height:4px;width:46px;border-radius:99px;background:var(--line);overflow:hidden;flex:0 0 auto}
+  .wtbar > i{display:block;height:100%;background:var(--py-yellow);border-radius:99px}
+  .chap .state{flex:0 0 auto;display:flex;align-items:center;gap:5px}
+  .dot{width:8px;height:8px;border-radius:99px;background:var(--line-strong);flex:0 0 auto}
+  .dot.read{background:var(--py-blue)}
+  .dot.done{background:var(--ok)}
+  .scorechip{font-size:10.5px;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .heavy-tag{font-size:9.5px;font-weight:800;color:var(--py-yellow-deep);background:var(--py-yellow-soft);
+    border-radius:5px;padding:1px 5px;letter-spacing:.03em}
+
+  .aside-note{margin:14px 4px 0;font-size:11px;color:var(--ink-faint);line-height:1.6}
+
+  /* ---- main ---- */
+  main{min-width:0}
+  .ch-hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px}
+  .ch-hero .eyebrow{font-size:11.5px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--py-blue)}
+  .ch-hero h2{margin:6px 0 2px;font-size:23px;font-weight:800;letter-spacing:.01em}
+  .ch-hero .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .pill{font-size:11.5px;font-weight:700;border-radius:99px;padding:4px 11px;border:1px solid var(--line-strong);color:var(--ink-soft);background:var(--surface-2)}
+  .pill.w{border-color:var(--py-yellow);background:var(--py-yellow-soft);color:var(--py-yellow-deep)}
+  .pill.g{border-color:#d9c2ec;background:#f5edfb;color:#7a3ca8}
+  .pill a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+
+  .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:4px;margin-bottom:16px;box-shadow:var(--shadow);width:fit-content}
+  .tab{font:inherit;font-size:13.5px;font-weight:700;border:0;background:transparent;color:var(--ink-soft);padding:8px 18px;border-radius:8px;cursor:pointer}
+  .tab.active{background:var(--py-blue);color:#fff}
+  .tab .cnt{font-size:11px;opacity:.75;margin-left:5px;font-variant-numeric:tabular-nums}
+
+  /* reading */
+  .reader{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px 26px 26px}
+  .sec{padding-top:22px}
+  .sec h3{font-size:16.5px;font-weight:800;margin:0 0 6px;padding-top:4px;display:flex;align-items:center;gap:9px}
+  .sec h3 .anchor{font-size:11px;font-weight:800;color:var(--py-blue);background:var(--py-blue-soft);border-radius:6px;padding:2px 7px;font-variant-numeric:tabular-nums}
+  .sec p{margin:0 0 11px}
+  .sec p + p{margin-top:-2px}
+  .reader pre{background:var(--code-bg);color:var(--code-ink);border-radius:9px;padding:14px 15px;overflow:auto;font-size:13px;line-height:1.6;margin:4px 0 14px;border:1px solid #2a3140}
+  .reader pre .c-com{color:var(--code-com)}
+  .reader pre .c-prompt{color:var(--code-dim)}
+  .reader pre .c-out{color:var(--code-str)}
+  .gapcard{border:1px solid #d9c2ec;background:#f7f1fc;border-radius:9px;padding:12px 14px;margin:6px 0 14px;display:flex;gap:11px}
+  .gapcard .ic{flex:0 0 auto;width:22px;height:22px;border-radius:6px;background:#7a3ca8;color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+  .gapcard .bd{font-size:13px;color:#5a2d82}
+  .gapcard .bd b{color:#41205e}
+  kbd{font-family:var(--font-mono);background:#eef1f6;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-size:12.5px;color:var(--ink)}
+  .src{margin-top:22px;padding-top:14px;border-top:1px dashed var(--line-strong);font-size:12px;color:var(--ink-faint)}
+  .src a{color:var(--py-blue)}
+
+  .stub{background:var(--surface);border:1px dashed var(--line-strong);border-radius:var(--radius);padding:30px 26px;text-align:center;color:var(--ink-soft)}
+  .stub .big{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .stub a.btn{display:inline-block;margin-top:14px;background:var(--py-blue);color:#fff;text-decoration:none;font-weight:700;font-size:13.5px;padding:9px 18px;border-radius:9px}
+
+  /* summary card */
+  .reader.sm-only{padding:18px}
+  .summary{border:1px solid var(--line);background:linear-gradient(180deg,#fff, #fbfcfe);border-radius:12px;padding:16px 18px}
+  .summary.at-end{margin-top:26px;border-top:3px solid var(--py-yellow);background:linear-gradient(180deg,#fffdf5,#fff)}
+  .sm-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .sm-title{font-size:15.5px;font-weight:800;letter-spacing:.01em}
+  .sm-title::before{content:"";display:inline-block;width:8px;height:16px;background:var(--py-yellow);border-radius:2px;margin-right:9px;vertical-align:-2px}
+  .sm-level{font-size:11px;font-weight:800;border-radius:99px;padding:3px 10px}
+  .sm-level.hi{background:var(--py-yellow-soft);color:var(--py-yellow-deep)}
+  .sm-level.mi{background:var(--py-blue-soft);color:var(--py-blue-deep)}
+  .sm-level.lo{background:#eef1f6;color:var(--ink-soft)}
+  .sm-gist{margin:2px 0 14px;color:var(--ink-soft);font-size:13.5px}
+  .sm-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .sm-col{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .sm-col.hot{border-color:var(--py-yellow);background:#fffdf4}
+  .sm-lbl{font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:7px}
+  .sm-col.hot .sm-lbl{color:var(--py-yellow-deep)}
+  .sm-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+  .sm-list li{font-size:13.5px;line-height:1.55}
+  .sm-col.hot .sm-list li{font-weight:550}
+  .sm-list code{background:#eef1f6;border-radius:4px;padding:1px 5px;font-size:12.5px}
+  .sm-list .gapb{color:#7a3ca8}
+  .sm-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+  .sm-btn{font:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:9px;cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);text-decoration:none}
+  .sm-btn.primary{background:var(--py-blue);color:#fff;border-color:var(--py-blue)}
+  .sm-btn.ghost{color:var(--py-blue)}
+  @media (max-width:520px){ .sm-grid{grid-template-columns:1fr} }
+
+  /* quiz */
+  .quizwrap{display:flex;flex-direction:column;gap:14px}
+  .q{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px}
+  .q .qhead{display:flex;gap:10px;align-items:baseline;margin-bottom:4px}
+  .q .qn{font-size:11.5px;font-weight:800;color:var(--py-blue);background:var(--py-blue-soft);border-radius:6px;padding:2px 8px;flex:0 0 auto}
+  .q .qprompt{font-weight:650;font-size:15px}
+  .q pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:11px 13px;font-size:13px;overflow:auto;margin:10px 0 12px;line-height:1.55}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;gap:11px;align-items:flex-start;border:1.5px solid var(--line-strong);background:var(--surface-2);
+    border-radius:9px;padding:11px 13px;cursor:pointer;font:inherit;font-size:14px;text-align:left;transition:border-color .12s,background .12s;color:var(--ink)}
+  .opt:hover:not(:disabled){border-color:var(--py-blue)}
+  .opt:disabled{cursor:default}
+  .opt .mk{flex:0 0 auto;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line-strong);
+    display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono)}
+  .opt .otx{min-width:0}
+  .opt .otx code{background:#eef1f6;border-radius:4px;padding:1px 5px;font-size:13px}
+  .opt.correct{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.correct .mk{background:var(--ok);border-color:var(--ok);color:#fff}
+  .opt.wrong{border-color:var(--no);background:var(--no-soft)}
+  .opt.wrong .mk{background:var(--no);border-color:var(--no);color:#fff}
+  .explain{margin-top:12px;border-left:3px solid var(--py-blue);background:var(--py-blue-soft);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13.5px;display:none}
+  .explain.show{display:block}
+  .explain b{color:var(--py-blue-deep)}
+  .explain code{background:#fff;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12.5px}
+
+  .quizbar{position:sticky;bottom:0;z-index:20;margin-top:4px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);
+    border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);padding:12px 16px;display:flex;align-items:center;gap:14px}
+  .quizbar .scoretxt{font-weight:750;font-size:14px}
+  .quizbar .scoretxt b{font-variant-numeric:tabular-nums;color:var(--py-blue-deep);font-size:18px}
+  .quizbar .pass{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px}
+  .quizbar .pass.ok{background:var(--ok-soft);color:var(--ok)}
+  .quizbar .pass.no{background:var(--no-soft);color:var(--no)}
+  .quizbar .sp{flex:1}
+  .quizbar button{font:inherit;font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:9px;cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-soft)}
+  .quizbar button.primary{background:var(--py-blue);color:#fff;border-color:var(--py-blue)}
+
+  footer{max-width:1180px;margin:0 auto;padding:8px 18px 40px;color:var(--ink-faint);font-size:11.5px;line-height:1.7}
+  footer a{color:var(--py-blue)}
+  footer .lic{margin-top:6px;padding-top:10px;border-top:1px solid var(--line)}
+
+  /* mobile */
+  .menubtn{display:none}
+  @media (max-width:860px){
+    .wrap{grid-template-columns:1fr;padding-top:14px}
+    aside{position:fixed;inset:0 auto 0 0;width:84%;max-width:320px;z-index:60;background:var(--bg);
+      transform:translateX(-102%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.18);
+      padding:16px 14px;overflow:auto}
+    body.nav-open aside{transform:translateX(0)}
+    .scrim{display:none;position:fixed;inset:0;background:rgba(20,28,40,.4);z-index:55}
+    body.nav-open .scrim{display:block}
+    .menubtn{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);cursor:pointer}
+    .obar{width:78px}
+    .brand h1{font-size:14px}
+    .overall .lbl{display:none}
+  }
+  @media (max-width:520px){
+    .reader{padding:6px 16px 20px}
+    .ch-hero{padding:16px}
+    .ch-hero h2{font-size:20px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <button class="menubtn" id="menuBtn" aria-label="章メニュー">☰</button>
+    <div class="brand">
+      <div class="logo">Py</div>
+      <div style="min-width:0">
+        <h1>Python チュートリアル 学習アプリ</h1>
+        <div class="sub">基礎試験対策 ・ Python 3.9 / 第4版準拠</div>
+      </div>
+    </div>
+    <div class="top-spacer"></div>
+    <div class="overall">
+      <span class="lbl" style="font-size:12px;color:var(--ink-faint);font-weight:650">学習進捗</span>
+      <span class="pct" id="overallPct">0%</span>
+      <div class="obar"><i id="overallBar"></i></div>
+    </div>
+    <button class="reset" id="resetBtn">進捗リセット</button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<div class="wrap">
+  <aside id="sidebar">
+    <div class="idx-head">
+      <span class="t">章 / 出題配点</span>
+      <span class="legend"><b>■</b> 配点の重い章</span>
+    </div>
+    <ul class="chaplist" id="chapList"></ul>
+    <p class="aside-note">黄色のバーは試験での出題配点の目安です。全40問中、<b>3・4・5・8・10章で約30問</b>を占めます。まずはここから。</p>
+  </aside>
+
+  <main id="main"><!-- rendered --></main>
+</div>
+
+<footer>
+  本アプリの解説本文は <b>Python 3.9 公式チュートリアル（日本語版）</b> から引用しています。練習問題はオリジナル（基礎試験の出題形式に準拠）です。
+  <div class="lic">
+    © 2001–2025 Python Software Foundation. 公式ドキュメント本文は <a href="https://docs.python.org/ja/3.9/license.html" target="_blank" rel="noopener">Python Software Foundation License Version 2</a> の下で利用しています。
+    出典: <a href="https://docs.python.org/ja/3.9/tutorial/index.html" target="_blank" rel="noopener">docs.python.org/ja/3.9/tutorial</a>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+// 出題配点（出典のある 3/4/5/8/10章のみ数値を表示。他章は控えめ表記）
+const CHAPTERS = [
+  {n:1,  title:"やる気を高めよう",                  slug:"appetite",     q:null},
+  {n:2,  title:"Pythonインタプリタを使う",          slug:"interpreter",  q:null},
+  {n:3,  title:"形式ばらないPythonの紹介",          slug:"introduction", q:6},
+  {n:4,  title:"その他の制御フローツール",          slug:"controlflow",  q:9},
+  {n:5,  title:"データ構造",                        slug:"datastructures",q:7},
+  {n:6,  title:"モジュール",                        slug:"modules",      q:null},
+  {n:7,  title:"入力と出力",                        slug:"inputoutput",  q:null},
+  {n:8,  title:"エラーと例外",                      slug:"errors",       q:4},
+  {n:9,  title:"クラス",                            slug:"classes",      q:null},
+  {n:10, title:"標準ライブラリミニツアー",          slug:"stdlib",       q:4},
+  {n:11, title:"標準ライブラリミニツアー その2",    slug:"stdlib2",      q:null},
+  {n:12, title:"仮想環境とパッケージ",              slug:"venv",         q:null},
+  {n:13, title:"さあ何を?",                         slug:"whatnow",      q:null},
+  {n:14, title:"対話モードでの入力編集とヒストリ置換",slug:"interactive", q:null},
+  {n:15, title:"浮動小数点演算、その問題と制限",    slug:"floatingpoint",q:null},
+  {n:16, title:"付録",                              slug:"appendix",     q:null},
+];
+const MAXQ = 9; // 配点バー正規化用
+const url9 = s => `https://docs.python.org/ja/3.9/tutorial/${s}.html`;
+
+// --- 読む本文（公式チュートリアル日本語版より。p=段落, code=コード, gap=第3版ギャップ注記）---
+const CONTENT = {
+  3:{ source:url9("introduction"), secs:[
+    {h:"3.1.1 数", a:"3.1.1", body:[
+      {t:"p",x:"インタプリタは簡単な電卓のように動作します。演算子 + - * / は他の多くの言語と同じで、() でグループ化できます。整数は int 型、小数部を持つ数は float 型です。"},
+      {t:"code",x:">>> 50 - 5*6\n20\n>>> 8 / 5  # 除算は常に float を返す\n1.6"},
+      {t:"p",x:"除算 / は常に浮動小数点数を返します。// は整数除算（小数部を切り捨て）、% は剰余、** は冪乗です。"},
+      {t:"code",x:">>> 17 / 3\n5.666666666666667\n>>> 17 // 3   # 切り捨て除算\n5\n>>> 17 % 3    # 剰余\n2\n>>> 5 ** 2    # 5の2乗\n25"},
+      {t:"p",x:"対話モードでは、最後に表示された結果が変数 _ に代入されます（読み取り専用として使うこと）。"},
+    ]},
+    {h:"3.1.2 文字列型", a:"3.1.2", body:[
+      {t:"p",x:"文字列は ' ' か \" \" で囲みます。どちらでも同じ文字列です。引用符は \\ でエスケープできます。\\ を特殊文字として解釈させたくない場合は、先頭に r を付けた raw string を使います。"},
+      {t:"code",x:">>> print('C:\\some\\name')   # \\n は改行になる\nC:\\some\name\n>>> print(r'C:\\some\\name')  # r を付けると文字どおり\nC:\\some\\name"},
+      {t:"p",x:"+ で連結、* で反復できます。隣り合った文字列リテラルは自動連結されます（ただしリテラル同士のみ。変数には効きません）。"},
+      {t:"code",x:">>> 3 * 'un' + 'ium'\n'unununium'\n>>> 'Py' 'thon'\n'Python'"},
+      {t:"p",x:"文字列はインデックスで1文字取得できます（先頭が0、負の値は末尾から）。スライス s[i:j] は部分文字列（開始は含み、終了は含まない）。s[:i] + s[i:] は常に s に等しくなります。"},
+      {t:"code",x:">>> word = 'Python'\n>>> word[0]    # 位置0\n'P'\n>>> word[-1]   # 末尾\n'n'\n>>> word[0:2]  # 0以上2未満\n'Py'\n>>> word[4:]   # 4から末尾まで\n'on'"},
+      {t:"p",x:"文字列はイミュータブル（変更不可）です。要素への代入はエラーになります。変更した文字列が欲しいときは新しい文字列を作ります。"},
+      {t:"gap",x:"第3版（Python 3.5ベース）には<b> f-string（フォーマット済み文字列リテラル）</b>の説明がありません。<code>f\"{name}は{age}歳\"</code> のような書き方は第4版の<b>7章「入力と出力」</b>で扱われ、試験でも狙われます。本アプリの第7章リンクから公式を必ず確認してください。"},
+    ]},
+    {h:"3.1.3 リスト型", a:"3.1.3", body:[
+      {t:"p",x:"リストは [ ] で複数の値をまとめます。インデックスとスライスができ、文字列と違ってミュータブル（要素を変更できる）です。+ で連結、append() で末尾追加、len() で長さを得ます。"},
+      {t:"code",x:">>> squares = [1, 4, 9, 16, 25]\n>>> squares[0]\n1\n>>> squares[-3:]   # スライスは新しいリストを返す\n[9, 16, 25]\n>>> squares + [36, 49]\n[1, 4, 9, 16, 25, 36, 49]\n>>> squares.append(36)\n>>> len(squares)\n6"},
+    ]},
+  ]},
+  4:{ source:url9("controlflow"), secs:[
+    {h:"4.1 if 文", a:"4.1", body:[
+      {t:"p",x:"if には0個以上の elif と、省略可能な else を付けられます。elif は 'else if' の短縮形で、過剰なインデントを避けられます。一連の if…elif…elif… は他言語の switch / case の代用になります。"},
+      {t:"code",x:">>> if x < 0:\n...     x = 0\n... elif x == 0:\n...     print('Zero')\n... else:\n...     print('More')"},
+    ]},
+    {h:"4.2 for 文 / 4.3 range()", a:"4.2", body:[
+      {t:"p",x:"Pythonの for は、任意のシーケンス（リストや文字列）の要素を、出現順に反復します。数列で繰り返したいときは range() が便利です。range(10) は0〜9を生成し、終端値は含みません。range(start, stop, step) で開始・刻みを指定できます。"},
+      {t:"code",x:">>> list(range(5, 10))\n[5, 6, 7, 8, 9]\n>>> list(range(0, 10, 3))\n[0, 3, 6, 9]\n>>> list(range(-10, -100, -30))\n[-10, -40, -70]"},
+      {t:"p",x:"range() はリストではなくイテラブルを返します（実際のリストを作らないので省メモリ）。リストが欲しいときは list() を使います。インデックス付き反復には enumerate() が便利です。"},
+    ]},
+    {h:"4.4 break / continue / ループの else", a:"4.4", body:[
+      {t:"p",x:"break は最も内側のループを中断します。continue は次の反復に進みます。ループには else 節を付けられ、これは for が反復を最後までやり切った（または while 条件が偽になった）ときに実行されますが、break で抜けたときは実行されません。"},
+      {t:"code",x:">>> for n in range(2, 10):\n...     for x in range(2, n):\n...         if n % x == 0:\n...             break\n...     else:\n...         # break されなかったときだけ実行\n...         print(n, 'is a prime number')"},
+      {t:"p",x:"ポイント: この else は if の else ではなく、for ループに属しています。try 文の else（例外が発生しなかったときに実行）に近い動きです。"},
+    ]},
+    {h:"4.5 pass 文", a:"4.5", body:[
+      {t:"p",x:"pass は何もしません。構文上は文が必要だが処理は要らない場面（最小クラスの定義や、後で実装する関数の仮置きの本体など）で使います。"},
+      {t:"code",x:">>> class MyEmptyClass:\n...     pass"},
+    ]},
+    {h:"4.6 関数を定義する", a:"4.6", body:[
+      {t:"p",x:"def で関数を定義します。本体の最初の行を文字列リテラルにすると、それが docstring（ドキュメンテーション文字列）になります。関数内で変数に代入するとローカル変数になります。実引数は『値渡し』ですが、ここでの値は常にオブジェクトへの参照です。"},
+      {t:"code",x:">>> def fib(n):\n...     \"\"\"Print a Fibonacci series up to n.\"\"\"\n...     a, b = 0, 1\n...     while a < n:\n...         print(a, end=' ')\n...         a, b = b, a+b"},
+    ]},
+    {h:"4.7 引数いろいろ（デフォルト/キーワード）", a:"4.7", body:[
+      {t:"p",x:"デフォルト引数値を指定でき、呼び出し時に省略できます。重要な落とし穴: デフォルト値は定義時に一度だけ評価されます。リストなど可変オブジェクトをデフォルトにすると、呼び出し間で共有されてしまいます。"},
+      {t:"code",x:"def f(a, L=[]):     # 危険: L は共有される\n    L.append(a)\n    return L\n# f(1)->[1]  f(2)->[1,2]  f(3)->[1,2,3]\n\ndef f(a, L=None):   # 正しい書き方\n    if L is None:\n        L = []\n    L.append(a)\n    return L"},
+      {t:"p",x:"キーワード引数 kwarg=value で、順序によらず名前で渡せます。*name で任意個の位置引数（タプル）、**name で任意個のキーワード引数（辞書）を受け取れます。"},
+    ]},
+    {h:"4.7.3 特殊なパラメータ（位置専用 / キーワード専用）", a:"4.7.3", body:[
+      {t:"p",x:"引数は通常、位置でもキーワードでも渡せます。これを制限するのが特殊なパラメータです。仮引数リスト中の / より前は『位置専用』、* より後は『キーワード専用』になります。"},
+      {t:"code",x:"def f(pos_only, /, standard, *, kwd_only):\n    ...\n# pos_only は位置でのみ、kwd_only はキーワードでのみ渡せる\n# standard は位置でもキーワードでも可"},
+      {t:"gap",x:"<b>位置専用引数（<code>/</code>）は Python 3.8 で追加</b>されたため、第3版（3.5ベース）には載っていません。第4版で新設された <b>4.7.3</b> 節そのものが第3版との最大の差分で、配点最重量の第4章にあたります。ここは必ず押さえてください。"},
+    ]},
+  ]},
+  5:{ source:url9("datastructures"), secs:[
+    {h:"5.1 リストのメソッド", a:"5.1", body:[
+      {t:"p",x:"主なメソッド: append(x) 末尾追加、extend(iterable) 連結追加、insert(i,x) 挿入、remove(x) 最初の一致を削除、pop([i]) 取り出して削除、index(x) 位置を返す、count(x) 出現回数、sort() 整列、reverse() 逆順、copy() 浅いコピー。"},
+      {t:"code",x:">>> fruits = ['orange','apple','pear','banana']\n>>> fruits.index('banana')\n3\n>>> fruits.count('apple')\n1\n>>> fruits.pop()\n'banana'"},
+      {t:"p",x:"重要: insert / remove / sort などリストを変更するメソッドは戻り値が None です。これは Python の可変データ構造に共通の設計原則です（x = list.sort() とすると None が入る、という引っかけに注意）。"},
+    ]},
+    {h:"5.1.1–5.1.2 スタック / キュー", a:"5.1.1", body:[
+      {t:"p",x:"リストはスタック（後入れ先出し）として簡単に使えます: append() で積み、pop() で取り出します。一方キュー（先入れ先出し）には不向きです（先頭の挿入・取り出しが遅い）。キューには collections.deque を使い、両端で高速に append / popleft できます。"},
+      {t:"code",x:">>> from collections import deque\n>>> queue = deque(['Eric','John','Michael'])\n>>> queue.append('Terry')\n>>> queue.popleft()\n'Eric'"},
+    ]},
+    {h:"5.1.3 リスト内包表記", a:"5.1.3", body:[
+      {t:"p",x:"リスト内包表記は [式 for 句 (0個以上の for/if 句)] でリストを簡潔に生成します。for と if の順序は通常のループと同じ順に書きます。式がタプルのときは () で囲む必要があります。"},
+      {t:"code",x:">>> squares = [x**2 for x in range(10)]\n>>> squares\n[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]\n>>> [(x, y) for x in [1,2,3] for y in [3,1,4] if x != y]\n[(1, 3), (1, 4), (2, 3), (2, 1), (2, 4), (3, 1), (3, 4)]"},
+    ]},
+    {h:"5.3 タプル / 5.4 集合", a:"5.3", body:[
+      {t:"p",x:"タプルはカンマ区切りの値の並びで、イミュータブルです。アンパック代入 x, y, z = t ができます。集合(set)は重複のない要素のコレクションで、和 | 差 - 積 & 対称差 ^ などの集合演算ができます。空集合は {} ではなく set() で作ります（{} は空の辞書）。"},
+      {t:"code",x:">>> basket = {'apple','orange','apple','pear'}\n>>> basket          # 重複は除かれる\n{'orange', 'pear', 'apple'}\n>>> 'apple' in basket\nTrue"},
+    ]},
+    {h:"5.5 辞書型", a:"5.5", body:[
+      {t:"p",x:"辞書はキーと値の対応です。キーは（変更不可能なら）任意の型が使えます。dict[key]=value で追加・更新、del dict[key] で削除、list(d) でキーの一覧、key in d で存在判定。dict() コンストラクタやキー:値 の内包表記でも作れます。"},
+      {t:"code",x:">>> tel = {'jack': 4098, 'sape': 4139}\n>>> tel['guido'] = 4127\n>>> tel\n{'jack': 4098, 'sape': 4139, 'guido': 4127}\n>>> list(tel)\n['jack', 'sape', 'guido']"},
+      {t:"gap",x:"辞書がキーの<b>挿入順を保持する</b>ことは Python 3.7 で正式仕様になりました。第3版が前提とする3.5では『順序は不定』だったため、<b>『辞書をループしたら何の順で出るか』</b>系の問題で認識を更新しておく必要があります。"},
+    ]},
+    {h:"5.6 ループのテクニック", a:"5.6", body:[
+      {t:"p",x:"辞書は items() でキーと値を同時に取り出せます。シーケンスは enumerate() でインデックスと値を、zip() で複数シーケンスを同時に反復できます。逆順は reversed()、整列順は sorted() を使います。"},
+      {t:"code",x:">>> for k, v in {'gallahad':'pure'}.items():\n...     print(k, v)\ngallahad pure\n>>> for i, v in enumerate(['tic','tac','toe']):\n...     print(i, v)\n0 tic\n1 tac\n2 toe"},
+    ]},
+  ]},
+  8:{ source:url9("errors"), secs:[
+    {h:"8.1 構文エラー / 8.2 例外", a:"8.1", body:[
+      {t:"p",x:"エラーには大きく2種類あります。構文エラー（SyntaxError）は構文解析の段階で見つかる誤りで、パーサが矢印で『検出された最初の位置』を示します。矢印の直前のトークンが原因のことが多いです。"},
+      {t:"p",x:"構文的に正しくても、実行中に起きるエラーが例外(exception)です。例外には型があり、メッセージの最終行に型名が出ます。代表例: ゼロ除算は ZeroDivisionError、未定義名の参照は NameError、型の不一致は TypeError。"},
+      {t:"code",x:">>> 10 * (1/0)\nZeroDivisionError: division by zero\n>>> 4 + spam*3\nNameError: name 'spam' is not defined\n>>> '2' + 2\nTypeError: can only concatenate str (not \"int\") to str"},
+    ]},
+    {h:"8.3 例外を処理する", a:"8.3", body:[
+      {t:"p",x:"try 節を実行し、例外が出なければ except 節は飛ばします。try 節で例外が発生し、それが except の型に一致すれば except 節を実行して継続します。一致しなければ外側へ伝播し、どこにもハンドラがなければ実行を停止します。"},
+      {t:"code",x:">>> while True:\n...     try:\n...         x = int(input('Please enter a number: '))\n...         break\n...     except ValueError:\n...         print('Oops! Try again...')"},
+      {t:"p",x:"except 節は複数書け、タプルで複数の例外型をまとめて指定できます（except (RuntimeError, TypeError):）。except 節のクラスは、その例外と同じか基底クラスのとき一致します。複数の except があるときは最初に一致したものだけが実行されます。"},
+      {t:"p",x:"try…except には else 節を付けられ（全 except より後ろ）、try 節で例外が出なかったときに実行されます。例外には引数があり、except ... as e: で受け取って e.args で参照できます。"},
+      {t:"code",x:">>> try:\n...     raise Exception('spam', 'eggs')\n... except Exception as inst:\n...     print(inst.args)\n('spam', 'eggs')"},
+    ]},
+    {h:"8.4 例外を送出する / 8.6 ユーザー定義", a:"8.4", body:[
+      {t:"p",x:"raise 文で例外を送出します。引数は例外インスタンスか例外クラス（Exception を継承）です。クラスを渡すと引数なしで暗黙にインスタンス化されます。引数なしの raise で、今処理中の例外を再送出できます。ユーザー定義例外は Exception を継承して作ります。"},
+      {t:"code",x:">>> raise NameError('HiThere')\nNameError: HiThere\n>>> raise ValueError   # raise ValueError() の短縮"},
+    ]},
+    {h:"8.7 クリーンアップ（finally / with）", a:"8.7", body:[
+      {t:"p",x:"try に finally 節を付けると、例外の有無にかかわらず必ず最後に実行されます（後片付け向き）。ファイルなどは with 文を使うと、処理後に自動的にクローズされ、例外時も確実に解放されます（定義済みクリーンアップ動作）。"},
+      {t:"code",x:">>> with open('myfile.txt') as f:\n...     for line in f:\n...         print(line, end='')\n# ブロックを抜けると f は自動でクローズされる"},
+    ]},
+  ]},
+  10:{ source:url9("stdlib"), secs:[
+    {h:"10.1–10.4 OS / ファイル / 引数", a:"10.1", body:[
+      {t:"p",x:"os はOSとやり取りする関数群（os.getcwd() など）。高水準なファイル操作は shutil（copyfile, move）。ワイルドカードのファイル一覧は glob.glob('*.py')。コマンドライン引数は sys.argv にリストで入ります（より高機能な解析は argparse）。"},
+      {t:"code",x:">>> import glob\n>>> glob.glob('*.py')\n['primes.py', 'random.py', 'quote.py']\n>>> import sys\n>>> print(sys.argv)\n['demo.py', 'one', 'two', 'three']"},
+    ]},
+    {h:"10.5 文字列パターンマッチング / 10.6 数学", a:"10.5", body:[
+      {t:"p",x:"re モジュールは正規表現による検索・置換を提供します。math は浮動小数点数学（math.cos, math.log）、random は乱数（random.choice, random.sample, random.random）、statistics は平均・分散など（mean, median, variance）を提供します。"},
+      {t:"code",x:">>> import re\n>>> re.findall(r'\\bf[a-z]*', 'which foot or hand fell fastest')\n['foot', 'fell', 'fastest']\n>>> import random\n>>> random.choice(['apple', 'pear', 'banana'])\n'apple'"},
+    ]},
+    {h:"10.7–10.9 ネット / 日付 / 圧縮", a:"10.7", body:[
+      {t:"p",x:"インターネットアクセスは urllib.request（URL取得）や smtplib（メール送信）。日付・時刻は datetime（date.today() など）。データ圧縮は zlib, gzip, bz2, zipfile, tarfile などのモジュールで扱えます。"},
+      {t:"code",x:">>> from datetime import date\n>>> now = date.today()\n>>> now.strftime('%m-%d-%y')\n'12-02-03'"},
+    ]},
+    {h:"10.10–10.11 性能測定 / 品質管理", a:"10.10", body:[
+      {t:"p",x:"性能測定は timeit（小さなコード片の計測）。品質管理では、docstring 内の使用例を自動検証する doctest と、本格的なテストを書く unittest が標準で使えます。"},
+      {t:"code",x:">>> from timeit import Timer\n>>> Timer('t=a; a=b; b=t', 'a=1; b=2').timeit()\n0.57"},
+    ]},
+  ]},
+  6:{ source:url9("modules"), secs:[
+    {h:"6.0 モジュールとは", a:"6", body:[
+      {t:"p",x:"モジュールは Python の定義や文を入れたファイルで、ファイル名は『モジュール名.py』です。定義を他のモジュールや main から import して再利用します。モジュール名は文字列として グローバル変数 __name__ で取得できます。"},
+      {t:"code",x:">>> import fibo\n>>> fibo.fib(1000)   # モジュール名.関数名 でアクセス\n0 1 1 2 3 5 8 13 21 34 55 89\n>>> fibo.__name__\n'fibo'"},
+    ]},
+    {h:"6.1 import の各形式", a:"6.1", body:[
+      {t:"p",x:"import module はモジュール名だけをシンボルテーブルに入れ、関数は module.func で呼びます。from module import name は名前を直接取り込みます（module 名は入りません）。from module import * は _ で始まる名前以外を全て取り込みますが、可読性を損なうため通常は避けます。as で別名を付けられます。"},
+      {t:"code",x:">>> from fibo import fib, fib2\n>>> fib(500)\n>>> from fibo import fib as fibonacci\n>>> import fibo as fib"},
+      {t:"p",x:"モジュールは1セッションにつき1回だけ import されます。修正を反映するにはインタプリタ再起動か importlib.reload() を使います。"},
+    ]},
+    {h:"6.1.1 スクリプトとして実行 / __main__", a:"6.1.1", body:[
+      {t:"p",x:"python fibo.py のように実行すると、__name__ に '__main__' が設定される点を除き import と同じように実行されます。次のガードを書くと、import 可能なモジュールであると同時にスクリプトとしても使えます（import 時には実行されません）。"},
+      {t:"code",x:"if __name__ == \"__main__\":\n    import sys\n    fib(int(sys.argv[1]))"},
+    ]},
+    {h:"6.1.2 検索パス / 6.1.3 .pyc / 6.3 dir()", a:"6.1.2", body:[
+      {t:"p",x:"import 時、まず組み込みモジュールを探し、無ければ sys.path のディレクトリ群から module.py を探します。sys.path はスクリプトのあるディレクトリ、PYTHONPATH、インストール既定（site-packages）から初期化されます。コンパイル済みは __pycache__ の .pyc にキャッシュされます。dir(module) でモジュールが定義する名前の一覧が得られます。"},
+      {t:"p",x:"パッケージは __init__.py を含むディレクトリで、ドット区切り（sound.effects.echo）でモジュールを階層化します。"},
+    ]},
+  ]},
+  7:{ source:url9("inputoutput"), secs:[
+    {h:"7.1.1 f-string（フォーマット済み文字列リテラル）", a:"7.1.1", body:[
+      {t:"p",x:"文字列の頭に f か F を付け、{式} と書くと式の値を埋め込めます（3.6〜）。: の後ろに書式指定子を付けられます（{値:.3f} で小数3桁、{値:10} で最小幅10）。変換修飾子 !r は repr()、!s は str()、!a は ascii() を適用します。"},
+      {t:"code",x:">>> year = 2016\n>>> f'Results of the {year}'\n'Results of the 2016'\n>>> import math\n>>> print(f'pi is {math.pi:.3f}')\npi is 3.142\n>>> animals = 'eels'\n>>> print(f'{animals!r}')\n'eels'"},
+      {t:"gap",x:"<b>f-string は Python 3.6 で追加</b>されたため、第3版（3.5ベース）には載っていません。第4版の差分の中でも最も日常的に使う記法で、試験でも狙われます。書式指定（<code>:.2f</code> や <code>:10</code>）と <code>!r</code> まで押さえてください。"},
+    ]},
+    {h:"7.1.2 str.format() / 7.1.3 手作業", a:"7.1.2", body:[
+      {t:"p",x:"str.format() は {} を置換フィールドにします。{0} {1} で位置指定、{name} でキーワード指定、{0[key]} や **dict で辞書参照ができます。手作業の整形には str.rjust() / ljust() / center() / zfill() などが使えます。"},
+      {t:"code",x:">>> print('{0} and {1}'.format('spam', 'eggs'))\nspam and eggs\n>>> print('{1} and {0}'.format('spam', 'eggs'))\neggs and spam\n>>> print('This {food} is good'.format(food='spam'))\nThis spam is good"},
+    ]},
+    {h:"str() と repr()", a:"7.1", body:[
+      {t:"p",x:"str() は人間に読みやすい表現、repr() はインタプリタが読める（多くは eval で戻せる）厳密な表現を返します。文字列では特に差が出ます。repr('x') は引用符ごと表示します。"},
+      {t:"code",x:">>> s = 'Hello'\n>>> str(s)\n'Hello'\n>>> repr(s)\n\"'Hello'\""},
+    ]},
+    {h:"7.2 ファイルの読み書き / json", a:"7.2", body:[
+      {t:"p",x:"open(name, mode) でファイルを開きます（'r' 読み, 'w' 書き, 'a' 追記, 'b' バイナリ）。with 文で開くとブロックを抜けるとき自動でクローズされます。読み込みは read() / readline() / 行の反復、書き込みは write()。構造化データは json.dump() で保存、json.load() で復元します。"},
+      {t:"code",x:">>> with open('f.txt') as f:\n...     for line in f:\n...         print(line, end='')\n>>> import json\n>>> json.dumps([1, 'simple', 'list'])\n'[1, \"simple\", \"list\"]'"},
+    ]},
+  ]},
+  9:{ source:url9("classes"), secs:[
+    {h:"9.2 スコープと名前空間（LEGB）", a:"9.2", body:[
+      {t:"p",x:"名前空間は『名前→オブジェクト』の対応です。名前の検索は、ローカル → 外側の関数 → モジュールのグローバル → 組み込み の順（LEGB）に行われます。global 文はモジュールのグローバルを、nonlocal 文は外側の関数の変数を再束縛します。宣言しない代入は常に最内（ローカル）に新しい名前を作ります。"},
+      {t:"code",x:"def scope_test():\n    def do_nonlocal():\n        nonlocal spam; spam = 'nonlocal'\n    def do_global():\n        global spam; spam = 'global'\n    spam = 'test'\n    do_nonlocal(); print(spam)   # nonlocal\n    do_global();   print(spam)   # nonlocal（モジュール側を変更）"},
+    ]},
+    {h:"9.3 クラス定義・インスタンス・__init__", a:"9.3", body:[
+      {t:"p",x:"class でクラス（＝新しい型）を定義します。ClassName() でインスタンスを生成し、__init__(self, ...) があれば生成時に呼ばれ初期化します。メソッドの第一引数 self はインスタンス自身を表し、呼び出し時に暗黙で渡されます。"},
+      {t:"code",x:"class Dog:\n    def __init__(self, name):\n        self.name = name      # インスタンス変数\n    def bark(self):\n        return self.name + ' says woof'\n\n>>> d = Dog('Rex')\n>>> d.bark()\n'Rex says woof'"},
+    ]},
+    {h:"9.3.5 クラス変数とインスタンス変数", a:"9.3.5", body:[
+      {t:"p",x:"インスタンス変数はインスタンスごとに固有、クラス変数はすべてのインスタンスで共有されます。共有のため、可変オブジェクト（リスト等）をクラス変数にすると全インスタンスで状態が混ざる『共有の罠』に注意します。同じ状態はインスタンス変数（__init__ 内）に持たせます。"},
+      {t:"code",x:"class Dog:\n    kind = 'canine'        # クラス変数（共有）\n    def __init__(self, name):\n        self.name = name    # インスタンス変数（固有）"},
+    ]},
+    {h:"9.5 継承 / 9.6 プライベート", a:"9.5", body:[
+      {t:"p",x:"class 派生(基底): で継承します。派生クラスは基底のメソッドを上書き（オーバーライド）でき、super() で基底の処理を呼べます。多重継承も可能です。__ で始まる名前は名前修飾され（_ClassName__x）、擬似的にプライベートになります。"},
+      {t:"code",x:"class Animal:\n    def speak(self): return '...'\nclass Cat(Animal):\n    def speak(self): return 'meow'   # オーバーライド"},
+    ]},
+    {h:"9.8–9.9 イテレータ / ジェネレータ", a:"9.8", body:[
+      {t:"p",x:"for はオブジェクトの __iter__() で得たイテレータの __next__() を、StopIteration まで呼びます。yield を含む関数はジェネレータになり、呼ぶたびに続きから値を返します（状態を自動保持）。() で囲むジェネレータ式もあります。"},
+      {t:"code",x:"def reverse(data):\n    for i in range(len(data)-1, -1, -1):\n        yield data[i]\n\n>>> list(reverse('abc'))\n['c', 'b', 'a']"},
+    ]},
+  ]},
+};
+
+// --- 練習問題（オリジナル / 基礎試験4択形式）---
+// correct は0始まりのインデックス
+const QUIZ = {
+  3:[
+    {q:"次の式の結果は？", code:">>> 8 / 5", opts:["1","1.6","2","エラー"],correct:1,
+     ex:"除算 <code>/</code> は常に float を返します。整数同士でも <code>1.6</code> になります。切り捨て除算なら <code>8 // 5</code> で <code>1</code>。"},
+    {q:"次の式の結果は？", code:">>> 17 % 3", opts:["5","5.66...","2","0"],correct:2,
+     ex:"<code>%</code> は剰余。17 = 3×5 + 2 なので余りは <code>2</code> です。"},
+    {q:"word = 'Python' のとき word[-2] は？", opts:["'o'","'n'","'t'","'h'"],correct:0,
+     ex:"負のインデックスは末尾から。-1 が 'n'、-2 が 'o' です。"},
+    {q:"word = 'Python' のとき word[0:2] は？", opts:["'Pyt'","'Py'","'yt'","'P'"],correct:1,
+     ex:"スライスは開始を含み終了を含みません。位置0と1の 'Py' になります。"},
+    {q:"次の式の結果は？", code:">>> 3 * 'un' + 'ium'", opts:["'ununium'","'un3ium'","'unununium'","エラー"],correct:2,
+     ex:"<code>*</code> は文字列の反復で 'ununun'、それに 'ium' を連結して <code>'unununium'</code>。"},
+    {q:"次のコードの出力は？", code:">>> print(r'C:\\some\\name')", opts:["C:\\some\\name","C:\\some(改行)ame","エラー","C:/some/name"],correct:0,
+     ex:"先頭の <code>r</code> は raw string。<code>\\n</code> も改行扱いされず、書いたとおり <code>C:\\some\\name</code> と出力されます。"},
+    {q:"文字列 word = 'Python' に対し word[0] = 'J' を実行すると？", opts:["'Jython' になる","何も起きない","TypeError になる","'J' が返る"],correct:2,
+     ex:"文字列はイミュータブル（変更不可）。要素への代入は <code>TypeError</code> です。変更したいときは新しい文字列を作ります。"},
+    {q:"次の式の結果は？", code:">>> 5 ** 2 + 1", opts:["26","36","11","27"],correct:0,
+     ex:"<code>**</code> は <code>+</code> より優先されます。5**2=25、+1 で <code>26</code>。"},
+    {q:"2 ** 10 の結果は？", opts:["20","100","1024","1000"],correct:2,
+     ex:"<code>**</code> は冪乗。2の10乗で <code>1024</code>。"},
+    {q:"word = 'Python' のとき word[2:5] は？", opts:["'tho'","'yth'","'thon'","'ton'"],correct:0,
+     ex:"位置2以上5未満。't','h','o' で <code>'tho'</code>（終了の5は含まない）。"},
+    {q:"次の式の結果は？", code:">>> 'Py' 'thon'", opts:["'Python'","'Py thon'","SyntaxError","('Py','thon')"],correct:0,
+     ex:"隣り合う文字列リテラルは自動連結され <code>'Python'</code> に。ただしリテラル同士のみで、変数には効きません。"},
+  ],
+  4:[
+    {q:"list(range(0, 10, 3)) の結果は？", opts:["[0, 3, 6, 9]","[0, 3, 6, 9, 10]","[3, 6, 9]","[0,1,2,...,9]"],correct:0,
+     ex:"start=0, stop=10, step=3。終端値10は含まれないので <code>[0, 3, 6, 9]</code>。"},
+    {q:"for ループに付けた else 節が実行されるのはどれ？", opts:["毎回必ず","break で抜けたとき","break されずに最後まで回ったとき","エラー時のみ"],correct:2,
+     ex:"ループの else は、break で中断されずに反復をやり切ったときに実行されます。break で抜けると実行されません。"},
+    {q:"range(10) が返すものは？", opts:["長さ10のリスト","イテラブルなrangeオブジェクト","タプル","ジェネレータ関数"],correct:1,
+     ex:"range はリストではなくイテラブルな range オブジェクトを返します（省メモリ）。リストが欲しければ <code>list(range(10))</code>。"},
+    {q:"次の関数を f(1); f(2); f(3) と順に呼ぶと、3回目の戻り値は？",
+     code:"def f(a, L=[]):\n    L.append(a)\n    return L", opts:["[3]","[1, 2, 3]","[2, 3]","エラー"],correct:1,
+     ex:"デフォルト値は定義時に一度だけ評価され、呼び出し間で共有されます。よって <code>[1, 2, 3]</code>。回避するには <code>L=None</code> にして関数内で <code>[]</code> を作ります。"},
+    {q:"def f(pos, /, both, *, kwd): の定義で、正しい呼び出しはどれ？",
+     opts:["f(1, both=2, kwd=3)","f(pos=1, 2, kwd=3)","f(1, 2, 3)","f(1, 2, both=2, kwd=3)"],correct:0,
+     ex:"<code>/</code> より前(pos)は位置専用、<code>*</code> より後(kwd)はキーワード専用。both は両方可。よって <code>f(1, both=2, kwd=3)</code> が正しい。pos をキーワードで、kwd を位置で渡すのは不可。"},
+    {q:"任意個のキーワード引数を辞書として受け取る書き方は？", opts:["*args","**kwargs","/kwargs","&kwargs"],correct:1,
+     ex:"<code>*name</code> は任意個の位置引数（タプル）、<code>**name</code> は任意個のキーワード引数（辞書）を受け取ります。"},
+    {q:"pass 文の説明として正しいのは？", opts:["ループを抜ける","次の反復へ進む","何もしない（構文上の穴埋め）","関数を即終了する"],correct:2,
+     ex:"<code>pass</code> は何もしません。文が構文上必要だが処理は不要な場面（空クラスや未実装の本体）で使います。break/continue/return とは別物です。"},
+    {q:"sum(range(4)) の結果は？", opts:["6","10","4","0"],correct:0,
+     ex:"range(4) は 0,1,2,3。合計は 0+1+2+3 = <code>6</code>。"},
+    {q:"continue 文の動作は？", opts:["ループを抜ける","ループの次の反復に進む","関数を終了する","何もしない"],correct:1,
+     ex:"<code>continue</code> はそれ以降をスキップして次の反復へ。ループ自体は抜けません（抜けるのは break）。"},
+    {q:"次のコードで f(4) の結果は？", code:">>> f = lambda x: x + 1\n>>> f(4)", opts:["4","5","'x+1'","エラー"],correct:1,
+     ex:"<code>lambda x: x + 1</code> は無名関数。f(4) は 4+1 = <code>5</code>。"},
+    {q:"def greet(name, msg): の呼び出しとして正しいのは？", opts:["greet(msg='hi', name='Sara')","greet(=Sara, =hi)","greet(name:'Sara')","greet[name='Sara']"],correct:0,
+     ex:"キーワード引数なら順序によらず名前で渡せます。<code>greet(msg='hi', name='Sara')</code> が正しい形。"},
+  ],
+  5:[
+    {q:"次のコードの後、x に入る値は？", code:">>> x = [3, 1, 2].sort()", opts:["[1, 2, 3]","[3, 1, 2]","None","エラー"],correct:2,
+     ex:"<code>sort()</code> はインプレースで並べ替え、戻り値は <code>None</code>。並べ替えた新リストが欲しいときは <code>sorted([3,1,2])</code> を使います。"},
+    {q:"append と extend の違いとして正しいのは？",
+     opts:["同じ動作","append は要素を1つ追加、extend はイテラブルの各要素を追加","extend は先頭に追加","append はリストを返す"],correct:1,
+     ex:"<code>[1,2].append([3,4])</code> は <code>[1,2,[3,4]]</code>、<code>[1,2].extend([3,4])</code> は <code>[1,2,3,4]</code> になります。"},
+    {q:"[x**2 for x in range(5)] の結果は？", opts:["[0, 1, 4, 9, 16]","[1, 4, 9, 16, 25]","[0,1,2,3,4]","[0, 2, 4, 6, 8]"],correct:0,
+     ex:"リスト内包表記。range(5)=0..4 の各2乗で <code>[0, 1, 4, 9, 16]</code>。"},
+    {q:"効率的なキュー（先入れ先出し）の実装に推奨されるのは？", opts:["list の insert(0,x)/pop(0)","collections.deque","tuple","set"],correct:1,
+     ex:"list は先頭操作が遅いため、両端で高速な <code>collections.deque</code>（append / popleft）が推奨されます。"},
+    {q:"空の集合(set)を作る正しい方法は？", opts:["{}","set()","[]","()"],correct:1,
+     ex:"<code>{}</code> は空の『辞書』。空集合は <code>set()</code> で作ります。"},
+    {q:"Python 3.7以降、辞書をループしたときの要素の順序は？", opts:["ランダム","キーのソート順","挿入した順","不定（保証なし）"],correct:2,
+     ex:"3.7で挿入順の保持が正式仕様になりました。第3版が前提とする3.5では不定だったため、ここは認識の更新が必要な差分です。"},
+    {q:"basket = {'apple','apple','pear'} のとき len(basket) は？", opts:["3","2","1","エラー"],correct:1,
+     ex:"set は重複を除くので要素は 'apple' と 'pear' の2つ。<code>len</code> は <code>2</code>。"},
+    {q:"次のコードの後、a は？", code:">>> a = [1, 2, 3]\n>>> del a[0]", opts:["[2, 3]","[1, 3]","[1, 2]","[]"],correct:0,
+     ex:"<code>del a[0]</code> は先頭要素を削除し <code>[2, 3]</code>。スライス <code>del a[:]</code> で全削除も可能。"},
+    {q:"x, y = (10, 20) のとき y は？", opts:["10","20","(10, 20)","エラー"],correct:1,
+     ex:"タプルのアンパック代入。x=10、y=<code>20</code> になります。"},
+    {q:"{1, 2, 3} & {2, 3, 4} の結果は？", opts:["{1, 2, 3, 4}","{2, 3}","{1, 4}","{1}"],correct:1,
+     ex:"<code>&</code> は積集合（共通要素）。<code>{2, 3}</code>。和は |、差は -、対称差は ^。"},
+    {q:"[x for x in range(5) if x % 2 == 0] の結果は？", opts:["[0, 2, 4]","[1, 3]","[0, 1, 2, 3, 4]","[2, 4]"],correct:0,
+     ex:"if で偶数だけを残す内包表記。0,2,4 で <code>[0, 2, 4]</code>。"},
+  ],
+  8:[
+    {q:"次のコードを実行すると？", code:">>> 10 * (1/0)", opts:["100","0","ZeroDivisionError","TypeError"],correct:2,
+     ex:"ゼロ除算は <code>ZeroDivisionError: division by zero</code> を送出します。"},
+    {q:"'2' + 2 を実行すると？", opts:["'22'","4","'4'","TypeError"],correct:3,
+     ex:"文字列と整数は連結できず <code>TypeError</code>。数にしたいなら <code>int('2') + 2</code>、文字列にしたいなら <code>'2' + str(2)</code>。"},
+    {q:"try…except の else 節が実行されるのは？", opts:["例外が発生したとき","例外が発生しなかったとき","常に最後に","except の前に毎回"],correct:1,
+     ex:"else は try 節で例外が出なかったときに実行されます。必ず実行したい後片付けは <code>finally</code> を使います。"},
+    {q:"複数の except 節があるとき実行されるのは？", opts:["一致する全部","最初に一致した1つだけ","最後に一致した1つだけ","ランダムに1つ"],correct:1,
+     ex:"最初に一致した except 節だけが実行されます。基底クラスを先に書くと派生クラスの節に届かないので順序に注意。"},
+    {q:"raise の説明として正しいのは？", opts:["例外を握りつぶす","例外を送出する","例外を無視する","ループを抜ける"],correct:1,
+     ex:"<code>raise</code> は例外を送出します。引数なしの <code>raise</code> は処理中の例外を再送出します。"},
+    {q:"try に付けると、例外の有無にかかわらず必ず実行される節は？", opts:["else","except","finally","ensure"],correct:2,
+     ex:"<code>finally</code> 節は必ず最後に実行され、後片付けに使います。"},
+    {q:"int('abc') を実行すると？", opts:["0","None","ValueError","TypeError"],correct:2,
+     ex:"数値に変換できない文字列は <code>ValueError</code>。型は合っているが値が不適切なケースです。"},
+    {q:"{'a': 1}['b'] を実行すると？", opts:["None","KeyError","IndexError","0"],correct:1,
+     ex:"辞書に存在しないキーへのアクセスは <code>KeyError</code>（リストの範囲外は IndexError）。"},
+    {q:"except (TypeError, ValueError): の意味は？", opts:["両方の例外を同じ節で処理","TypeErrorのみ処理","ValueErrorのみ処理","構文エラー"],correct:0,
+     ex:"タプルで複数の例外型を1つの except 節にまとめて指定できます。"},
+    {q:"except 節の中の引数なし raise は何をする？", opts:["新しい例外を作る","処理中の例外を再送出する","例外を消す","プログラム終了"],correct:1,
+     ex:"引数なしの <code>raise</code> は、いま処理中の例外をそのまま再送出します（上位に処理を委ねる）。"},
+  ],
+  10:[
+    {q:"コマンドライン引数がリストとして格納される場所は？", opts:["os.args","sys.argv","argparse.list","glob.argv"],correct:1,
+     ex:"<code>sys.argv</code> にリストで入ります（argv[0] はスクリプト名）。より高機能な解析は <code>argparse</code>。"},
+    {q:"ディレクトリのワイルドカード検索でファイル一覧を得るモジュールは？", opts:["glob","shutil","re","os.path"],correct:0,
+     ex:"<code>glob.glob('*.py')</code> でパターンに一致するファイル名のリストが得られます。"},
+    {q:"正規表現による検索・置換を提供するモジュールは？", opts:["regex","string","re","match"],correct:2,
+     ex:"標準ライブラリの <code>re</code> モジュールです（findall, sub, match など）。"},
+    {q:"乱数で要素を1つ選ぶ関数は？", opts:["random.pick()","random.choice()","random.one()","math.rand()"],correct:1,
+     ex:"<code>random.choice(seq)</code> がシーケンスから1つ選びます。複数なら <code>random.sample()</code>。"},
+    {q:"docstring 内の使用例を自動検証する標準モジュールは？", opts:["unittest","timeit","doctest","pytest"],correct:2,
+     ex:"<code>doctest</code> は docstring に書いた実行例とその結果を検証します。本格的なテストは <code>unittest</code>（pytest は標準ライブラリ外）。"},
+    {q:"math.sqrt(16) の結果は？", opts:["4","4.0","'4'","16"],correct:1,
+     ex:"<code>math.sqrt</code> は float を返すので <code>4.0</code>。"},
+    {q:"statistics.mean([1, 2, 3]) の結果は？", opts:["1","2","3","6"],correct:1,
+     ex:"算術平均は (1+2+3)/3 = <code>2</code>。statistics には median や variance もあります。"},
+    {q:"高水準なファイルのコピーや移動を提供するモジュールは？", opts:["os","shutil","glob","sys"],correct:1,
+     ex:"<code>shutil</code>（copyfile, move など）。低水準の os と使い分けます。"},
+    {q:"日付や時刻を扱う標準モジュールは？", opts:["calendar","datetime","timeit","clock"],correct:1,
+     ex:"<code>datetime</code>（date.today() など）。timeit は処理時間の計測用です。"},
+  ],
+  6:[
+    {q:"import fibo した後、fib 関数を呼ぶ正しい書き方は？", opts:["fib(100)","fibo.fib(100)","fibo::fib(100)","import.fib(100)"],correct:1,
+     ex:"<code>import module</code> はモジュール名だけを取り込むので <code>module.func</code> で呼びます。直接 <code>fib()</code> で呼びたいなら <code>from fibo import fib</code>。"},
+    {q:"if __name__ == '__main__': の役割は？", opts:["常にこのブロックを実行","import されたときだけ実行","スクリプトとして直接実行されたときだけ実行","エラー時に実行"],correct:2,
+     ex:"直接実行時は __name__ が '__main__' になり実行されます。import されたときは実行されません。"},
+    {q:"from fibo import * の説明として正しいのは？", opts:["fibo という名前も取り込む","_ で始まる名前以外をすべて取り込む","何も取り込まない","エラーになる"],correct:1,
+     ex:"<code>*</code> は <code>_</code> で始まる名前を除く全名前を取り込みます。可読性を損なうため通常は避けます。"},
+    {q:"モジュールの検索パスが格納されている変数は？", opts:["sys.modules","sys.path","os.path","sys.argv"],correct:1,
+     ex:"<code>sys.path</code>（スクリプトのディレクトリ→PYTHONPATH→インストール既定 の順）。"},
+    {q:"import fibo as fib とした後の呼び出しは？", opts:["fib.fib(100)","fibo.fib(100)","fib(100)","as.fib(100)"],correct:0,
+     ex:"<code>as</code> で別名を付けると、その名前でモジュールを扱います。<code>fib.fib(100)</code>。"},
+    {q:"dir(fibo) が返すものは？", opts:["関数の実行結果","モジュールが定義する名前の一覧","ソースコード","ファイルパス"],correct:1,
+     ex:"<code>dir(module)</code> はそのモジュールが定義する名前（関数・変数など）の一覧を返します。"},
+    {q:"コンパイル済みモジュール(.pyc)が置かれる場所は？", opts:["同じディレクトリ","__pycache__","/tmp","sys.path"],correct:1,
+     ex:"<code>__pycache__</code> ディレクトリに <code>module.バージョン.pyc</code> としてキャッシュされます。"},
+    {q:"from fibo import fib とした後、fibo という名前は？", opts:["使える","使えない（取り込まれない）","エラーになる","fib と同じ"],correct:1,
+     ex:"<code>from ... import 名前</code> はその名前だけを取り込み、モジュール名 fibo は取り込まれません。"},
+  ],
+  7:[
+    {q:"name='Sara' のとき、f-stringで 'Hi Sara' を作るのは？", opts:["f'Hi {name}'","'Hi {name}'","f'Hi name'","'Hi {Sara}'"],correct:0,
+     ex:"f を付け <code>{name}</code> と書くと値が埋め込まれます。f が無いと <code>{name}</code> はそのまま文字として残ります。"},
+    {q:"f'{math.pi:.2f}' の出力は？", opts:["3.14159","3.14","3.1","'3.14'"],correct:1,
+     ex:"<code>:.2f</code> は小数点以下2桁の固定小数点。<code>3.14</code> になります。"},
+    {q:"'{1} {0}'.format('a', 'b') の結果は？", opts:["'a b'","'b a'","'{1} {0}'","エラー"],correct:1,
+     ex:"番号は引数の位置。{1}='b'、{0}='a' なので <code>'b a'</code>。"},
+    {q:"repr('Hello') が返すものは？", opts:["Hello","'Hello'","\"'Hello'\"","HELLO"],correct:2,
+     ex:"repr は引用符込みの厳密表現を返すため、文字列 <code>'Hello'</code> を表す文字列（外側にも引用符）になります。str('Hello') なら <code>Hello</code>。"},
+    {q:"ファイルを開いて自動でクローズする推奨の書き方は？", opts:["f = open('x'); ... f.close()","with open('x') as f: ...","open('x').read()","file('x')"],correct:1,
+     ex:"<code>with open(...) as f:</code> はブロックを抜けるとき、例外時でも確実にクローズします。"},
+    {q:"open() のモード 'w' の意味は？", opts:["読み込み","追記","書き込み（既存内容を消す）","バイナリ読み込み"],correct:2,
+     ex:"<code>'w'</code> は書き込みで、既存ファイルは内容が消えます。末尾に足すなら <code>'a'</code>（追記）。"},
+    {q:"'{name}'.format(name='Sara') の結果は？", opts:["'name'","'Sara'","'{name}'","エラー"],correct:1,
+     ex:"キーワードで置換フィールド name に 'Sara' が入り <code>'Sara'</code>。"},
+    {q:"f'{7:3}' の出力は？（: の後ろは最小幅）", opts:["'7'","'  7'","'700'","'7  '"],correct:1,
+     ex:"幅3で右寄せされ、前に空白2つで <code>'  7'</code>（数値は既定で右寄せ）。"},
+    {q:"json.dumps([1, 2, 3]) が返すものは？", opts:["リスト [1, 2, 3]","文字列 '[1, 2, 3]'","タプル","エラー"],correct:1,
+     ex:"<code>json.dumps</code> はオブジェクトを JSON 形式の<b>文字列</b>に変換します。復元は json.loads。"},
+  ],
+  9:[
+    {q:"メソッドの第一引数 self は何を指す？", opts:["クラス自身","インスタンス自身","親クラス","モジュール"],correct:1,
+     ex:"<code>self</code> はインスタンス自身。メソッド呼び出し時に暗黙で渡されます。"},
+    {q:"インスタンス生成時に自動で呼ばれ、初期化を行うメソッドは？", opts:["__new__","__init__","__call__","__main__"],correct:1,
+     ex:"<code>__init__(self, ...)</code> が生成時に呼ばれます。"},
+    {q:"全インスタンスで共有されるのはどちら？", opts:["インスタンス変数","クラス変数","ローカル変数","self変数"],correct:1,
+     ex:"クラス本体に直接書いた<b>クラス変数</b>は共有されます。可変オブジェクトだと状態が混ざる罠に注意。個別に持つなら __init__ 内のインスタンス変数。"},
+    {q:"yield を含む関数は何になる？", opts:["通常の関数","ジェネレータ","クラス","デコレータ"],correct:1,
+     ex:"<code>yield</code> を含む関数はジェネレータになり、呼ぶたびに続きから値を返します（状態を自動保持）。"},
+    {q:"外側の関数の変数を関数内で再束縛する宣言は？", opts:["global","nonlocal","static","extern"],correct:1,
+     ex:"<code>nonlocal</code> は外側の関数の変数を、<code>global</code> はモジュールのグローバル変数を再束縛します。"},
+    {q:"クラスを定義するキーワードは？", opts:["def","class","object","struct"],correct:1,
+     ex:"<code>class 名前:</code> でクラスを定義します。"},
+    {q:"class Cat(Animal): の意味は？", opts:["Cat は Animal を継承する","Animal は Cat を継承する","2つは無関係","Cat を呼び出す"],correct:0,
+     ex:"括弧内が基底クラス。Cat は Animal を継承し、メソッドを上書き(オーバーライド)できます。"},
+    {q:"sum(x*x for x in range(3)) の結果は？", opts:["3","5","9","6"],correct:1,
+     ex:"ジェネレータ式。0+1+4 = <code>5</code>。括弧内に直接書けます。"},
+    {q:"クラス内で __balance のように __ で始めた属性は？", opts:["クラス変数になる","名前修飾され擬似プライベートになる","自動で削除される","定数になる"],correct:1,
+     ex:"<code>__名前</code> は <code>_クラス名__名前</code> に名前修飾され、外から直接触りにくい擬似プライベートになります。"},
+  ],
+  1:[
+    {q:"Pythonの特徴として最も適切なのは？", opts:["コンパイルしてから実行する低水準言語","学びやすく高水準のデータ構造を備えたインタープリタ型言語","型宣言が必須で実行速度を最優先する言語","Web専用で汎用処理には使えない言語"],correct:1,
+     ex:"Pythonは学習が容易で、リストや辞書などの高水準データ構造を標準で備えた<b>インタープリタ型</b>の汎用言語です。"},
+    {q:"処理速度が重要な部分でPythonがよく併用するものは？", opts:["アセンブリのみ","C/C++ による拡張モジュール","HTML","SQL"],correct:1,
+     ex:"速度が必要な部分は <b>C/C++ で書いた拡張モジュール</b>として組み込めます。Pythonは拡張・組み込みが容易な点も特徴です。"},
+    {q:"Pythonが向いているとされる開発スタイルは？", opts:["大規模な事前設計のみ","高速開発(RAD)やスクリプティング","ハードウェア制御専用","コンパイル前提のバッチ処理専用"],correct:1,
+     ex:"対話的に試せてコンパイル不要なため、<b>高速アプリケーション開発(RAD)やスクリプティング</b>に向きます。"},
+    {q:"Pythonのライセンス/入手性について正しいのは？", opts:["有償の商用ソフト","自由に使えるオープンソース","研究用途のみ無償","Windows専用"],correct:1,
+     ex:"Pythonは<b>自由に利用・配布できるオープンソース</b>で、主要なプラットフォームで動作します。"},
+  ],
+  2:[
+    {q:"対話モードの一次プロンプト（入力待ち）はどれ？", opts:[">>>","...","$","#"],correct:0,
+     ex:"一次プロンプトは <code>&gt;&gt;&gt;</code>。継続行は二次プロンプト <code>...</code> で表示されます。"},
+    {q:"複数行入力の継続行を示す二次プロンプトはどれ？", opts:[">>>","...",">","::"],correct:1,
+     ex:"if 文や関数定義など、続きの行は <code>...</code>（二次プロンプト）で入力します。"},
+    {q:"Pythonソースファイルの既定の文字エンコーディングは？", opts:["Shift_JIS","UTF-8","ASCII","Latin-1"],correct:1,
+     ex:"Python 3 のソースの既定エンコーディングは <b>UTF-8</b> です。"},
+    {q:"対話モードを終了する方法として正しいのは？（Unix系）", opts:["Ctrl-D または quit()","Esc キー","exit のみ","stop()"],correct:0,
+     ex:"Unix系では <b>Ctrl-D</b>、Windowsでは <b>Ctrl-Z</b>。どちらも <code>quit()</code> でも終了できます。"},
+    {q:"Pythonのコメントの書き方は？", opts:["// から行末","/* ... */ で囲む","# から行末","-- から行末"],correct:2,
+     ex:"<code>#</code> から行末までがコメント。文字列リテラル内の <code>#</code> はコメントになりません。"},
+  ],
+  11:[
+    {q:"10進数で丸め誤差を避けて正確に計算したいときに使うモジュールは？", opts:["math","decimal","random","statistics"],correct:1,
+     ex:"<code>decimal</code> は10進固定/浮動小数点演算を提供し、金額計算など誤差を避けたい場面で使います。"},
+    {q:"入れ子の複雑なデータ構造を見やすく整形して表示するモジュールは？", opts:["pprint","print","format","repr"],correct:0,
+     ex:"<code>pprint</code>（pretty printer）は深い構造を読みやすく整形して出力します。"},
+    {q:"テキストを指定した幅で折り返す（整形する）標準モジュールは？", opts:["textwrap","string","re","io"],correct:0,
+     ex:"<code>textwrap</code> は段落を指定幅に折り返すなどテキスト整形に使います。"},
+    {q:"アプリケーションのログ出力に使う標準モジュールは？", opts:["logging","syslog","trace","warning"],correct:0,
+     ex:"<code>logging</code> はレベル付きのログ出力（DEBUG/INFO/WARNING など）を標準で提供します。"},
+  ],
+  12:[
+    {q:"プロジェクトごとに隔離したPython環境を作るコマンドは？", opts:["python -m venv myenv","pip new myenv","python --create myenv","venv install myenv"],correct:0,
+     ex:"<code>python -m venv 名前</code> で仮想環境を作成します。標準ライブラリの <code>venv</code> モジュールを使います。"},
+    {q:"仮想環境(venv)を使う主な目的は？", opts:["実行速度を上げる","プロジェクトごとに依存パッケージを分離する","Pythonを高速にインストールする","コードを暗号化する"],correct:1,
+     ex:"プロジェクトごとに<b>依存パッケージを隔離</b>し、バージョン衝突を防ぐのが目的です。"},
+    {q:"外部パッケージをインストールするコマンドは？", opts:["pip get 名前","pip install 名前","python add 名前","venv install 名前"],correct:1,
+     ex:"<code>pip install 名前</code> でインストール。<code>pip uninstall</code> で削除、<code>pip list</code> で一覧表示します。"},
+    {q:"現在の環境の依存をバージョン付きで書き出し、requirements.txt 作成に使うコマンドは？", opts:["pip list","pip freeze","pip show","pip dump"],correct:1,
+     ex:"<code>pip freeze &gt; requirements.txt</code> のように、再現可能な形で依存を書き出します。"},
+    {q:"requirements.txt の役割として正しいのは？", opts:["仮想環境を起動する","依存パッケージをまとめて記録・再現する","Pythonの設定を変更する","ログを保存する"],correct:1,
+     ex:"依存パッケージとバージョンを記録し、<code>pip install -r requirements.txt</code> で同じ環境を再現できます。"},
+  ],
+  13:[
+    {q:"サードパーティ製パッケージを探して入手できる公式リポジトリは？", opts:["PyPI (Python Package Index)","GitHub のみ","docs.python.org","Stack Overflow"],correct:0,
+     ex:"<b>PyPI</b>（Python Package Index）が公式パッケージリポジトリで、<code>pip</code> はここから取得します。"},
+    {q:"言語仕様や標準ライブラリの詳細な公式ドキュメントを確認できるのは？", opts:["docs.python.org","PyPI","Wikipedia","各社ブログ"],correct:0,
+     ex:"公式の言語リファレンス／ライブラリリファレンスは <b>docs.python.org</b> で参照できます。"},
+  ],
+};
+
+// --- 章のまとめ（要点＋試験で出そうなポイント）---
+// level: high=配点重い / mid=そこそこ / low=ほぼ出題なし
+const SUMMARY = {
+  1:{level:"low", gist:"Pythonがどんな言語かを紹介する動機づけの章。文法やコードは出てきません。",
+     points:["学びやすく、高水準のデータ構造を備える","インタープリタ型で、対話的に試せる","スクリプティングや高速開発(RAD)に向く","C/C++ などで拡張・組み込みができる"],
+     hot:["直接の出題はほぼなし。『インタープリタ』『高水準言語』など用語の雰囲気を掴めば十分です。"]},
+  2:{level:"low", gist:"インタープリタの起動と対話モード、ソースの文字コードの話。",
+     points:["対話モードのプロンプトは一次 >>> と二次 ...","終了は Ctrl-D（Windowsは Ctrl-Z）または quit()","ソースの既定エンコーディングは UTF-8","# から行末まではコメント"],
+     hot:["出題は少なめ。『UTF-8がデフォルト』『>>> と ... の区別』を押さえれば十分。"]},
+  3:{level:"high", gist:"数・文字列・リストの基本操作。電卓のように式を試しながら型に慣れる章。",
+     points:["int と float。/ は常に float、// は切り捨て、% は剰余、** は冪乗","文字列はイミュータブル。インデックス/スライス/raw文字列/複数行","隣り合う文字列リテラルは自動連結（リテラル同士のみ）","リストはミュータブルで + や append() が使える"],
+     hot:["/ と // の違い、% と ** の計算","負のインデックスとスライス s[i:j]（終了は含まない）","3 * 'un' + 'ium' のような連結・反復","文字列がイミュータブル（要素代入は TypeError）","【3版の穴】f-string は7章。必ず確認"]},
+  4:{level:"high", gist:"制御フローと関数定義。配点が最も大きい最重要章。",
+     points:["if / elif / else、for はシーケンスを順に反復","range() はイテラブル（リストではない）","break / continue とループの else（break時は実行されない）","pass は何もしない穴埋め","def と docstring、引数は値（参照）渡し","デフォルト/キーワード/*args/**kwargs/特殊引数"],
+     hot:["range(start, stop, step) の範囲（終端を含まない）","ループの else が実行される条件","デフォルト引数 L=[] の共有バグ","【3版の穴】特殊引数 / と *（位置専用/キーワード専用）","*args（タプル）と **kwargs（辞書）の違い","lambda 式"]},
+  5:{level:"high", gist:"リスト・タプル・集合・辞書と内包表記。データ構造の総まとめ。",
+     points:["リスト変更系メソッド(sort/append/insert等)の戻り値は None","スタックは list、キューは collections.deque","リスト内包 [式 for x in seq if 条件]","タプルはイミュータブルでアンパック可","set は重複なし・集合演算、空集合は set()","辞書はキー:値、3.7+で挿入順を保持"],
+     hot:["x = list.sort() が None になる引っかけ","append（1要素）と extend（各要素）の違い","リスト内包表記の結果","空の集合は {} ではなく set()","【3版の穴】辞書がループで挿入順に出る","enumerate() / zip() / items()"]},
+  6:{level:"mid", gist:"モジュールとパッケージ。コードを分割して再利用する仕組み。",
+     points:["import module と from module import name","スクリプト実行時のみ動くガード if __name__ == '__main__'","モジュール検索パスは sys.path","コンパイル済み .pyc は __pycache__ に","dir() で名前一覧、パッケージは __init__.py"],
+     hot:["import の各形式の違い（module. が付くか否か）","if __name__ == '__main__' の意味","from package import * の挙動","dir() が返すもの"]},
+  7:{level:"mid", gist:"出力の整形とファイル入出力。f-string が登場する重要章。",
+     points:["f-string f\"{値:書式}\"（3.6〜）","str.format() と手動整形（%）","str() は読みやすく、repr() は厳密表現","open() は with と併用、read/readline/write","json.dump() / json.load() で構造化データ保存"],
+     hot:["【3版の穴】f-string の書き方と書式指定（最重要）","str と repr の違い","with open(...) as f: の自動クローズ","json での保存・読み込み"]},
+  8:{level:"high", gist:"エラーと例外の扱い。try 構文を確実に理解する章。",
+     points:["構文エラー(SyntaxError)と実行時の例外は別物","代表例外: ZeroDivisionError / NameError / TypeError / ValueError","try / except / else / finally","except は複数可・タプル指定可・最初の一致が実行","raise で送出、Exception 継承でユーザー定義"],
+     hot:["どのコードがどの例外型になるか","try-except-else-finally の実行される順","複数 except の一致順（基底クラスを先に書く罠）","else は例外が出なかったとき、finally は必ず実行","raise の使い方"]},
+  9:{level:"mid", gist:"クラスとオブジェクト指向。やや難しいが頻出テーマもある章。",
+     points:["class 定義、self、__init__ で初期化","クラス変数（共有）とインスタンス変数（個別）","継承・多重継承、メソッドの上書き","名前修飾によるプライベート擬似(_Class__x)","イテレータと yield を使うジェネレータ","スコープは LEGB、global / nonlocal"],
+     hot:["self と __init__ の役割","クラス変数を可変オブジェクトにすると共有される罠","継承とメソッドの探索","ジェネレータ（yield）","スコープと global / nonlocal"]},
+  10:{level:"high", gist:"標準ライブラリの代表モジュールを広く浅く。どれが何をするかを問う章。",
+     points:["os / shutil / glob / sys.argv / argparse","re（正規表現）","math / random / statistics","urllib / smtplib、datetime、圧縮系(zlib等)","timeit（計測）、doctest / unittest（テスト）"],
+     hot:["sys.argv にコマンドライン引数が入る","glob はワイルドカード検索、re は正規表現","random.choice / sample","datetime で日付","doctest と unittest の役割"]},
+  11:{level:"low", gist:"より進んだ標準ライブラリ。実務寄りで、基礎試験での比重は低め。",
+     points:["出力整形: reprlib / pprint / textwrap","string.Template、struct、threading、logging","weakref、collections / array / bisect / heapq","decimal（10進で誤差を避ける）"],
+     hot:["出題は少なめ。pprint/textwrap、logging、decimal を『名前と用途』で押さえる程度でOK。"]},
+  12:{level:"mid", gist:"仮想環境とパッケージ管理。venv と pip の基本。",
+     points:["python -m venv でプロジェクトごとの隔離環境を作る","環境を有効化(activate)して使う","pip install / uninstall / list / freeze","requirements.txt で依存をまとめて管理"],
+     hot:["venv を使う目的（依存の分離）","python -m venv の作成コマンド","pip の基本コマンド","requirements.txt の役割"]},
+  13:{level:"low", gist:"次に何を学ぶかの案内（読み物）。",
+     points:["標準ライブラリ／言語リファレンスへの導線","PyPI などのサードパーティ資源","コミュニティやメーリングリスト"],
+     hot:["出題はほぼなし。読み飛ばして大丈夫です。"]},
+  14:{level:"low", gist:"対話モードの入力編集・履歴などの便利機能。",
+     points:["タブ補完とヒストリ編集","IPython など対話環境の代替"],
+     hot:["出題はほぼなし。"]},
+  15:{level:"mid", gist:"二進浮動小数点の誤差。短いが試験で時々問われる章。",
+     points:["0.1 は二進で正確に表せない","0.1 + 0.2 は 0.3 ちょうどにならない","表示上の値と内部の実値は別","厳密さが必要なら decimal.Decimal / fractions.Fraction"],
+     hot:["浮動小数点に誤差があること","0.1+0.2 == 0.3 が False になる理由","厳密計算には Decimal がある"]},
+  16:{level:"low", gist:"対話モードの詳細・起動ファイルなどの付録。",
+     points:["対話モードのエラー処理","実行可能スクリプト（先頭の #! 行）","起動ファイル PYTHONSTARTUP、カスタマイズモジュール"],
+     hot:["出題はほぼなし。"]},
+};
+
+/* ============================================================
+   STORAGE (localStorage + in-memory fallback)
+   ============================================================ */
+const mem = {};
+const store = {
+  get(k){ try{ const v=localStorage.getItem(k); return v===null?(k in mem?mem[k]:null):v; }catch(e){ return k in mem?mem[k]:null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } },
+  clearAll(){ try{ Object.keys(localStorage).filter(x=>x.startsWith('pykiso:')).forEach(x=>localStorage.removeItem(x)); }catch(e){} for(const x in mem) delete mem[x]; }
+};
+const KEY = { read:n=>`pykiso:read:${n}`, score:n=>`pykiso:score:${n}`, ans:(n,i)=>`pykiso:ans:${n}:${i}` };
+
+/* ============================================================
+   STATE + HELPERS
+   ============================================================ */
+let current = 4;           // 起動章（配点最大）
+let tab = 'read';          // read | quiz
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmtCode(raw){      // 最低限のシンタックス装飾
+  return esc(raw).split('\n').map(line=>{
+    if(/^\s*#/.test(line) || /(?<!['"])#.*$/.test(line)){
+      line = line.replace(/(#.*)$/,'<span class="c-com">$1</span>');
+    }
+    line = line.replace(/^(\&gt;\&gt;\&gt;|\.\.\.)/,'<span class="c-prompt">$1</span>');
+    return line;
+  }).join('\n');
+}
+
+/* ============================================================
+   RENDER: sidebar
+   ============================================================ */
+function renderSidebar(){
+  const ul = document.getElementById('chapList');
+  ul.innerHTML = '';
+  CHAPTERS.forEach(c=>{
+    const hasContent = !!CONTENT[c.n];
+    const hasQuiz = !!QUIZ[c.n];
+    const read = store.get(KEY.read(c.n))==='1';
+    const sc = store.get(KEY.score(c.n));
+    const total = hasQuiz ? QUIZ[c.n].length : 0;
+    const done = sc!==null && total>0;
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'chap'+(c.n===current?' active':'');
+    btn.onclick = ()=>{ current=c.n; tab = CONTENT[c.n] ? 'read' : 'summary'; closeNav(); render(); };
+    const wt = c.q ? Math.round(c.q/MAXQ*100) : 8;
+    btn.innerHTML = `
+      <span class="no">${c.n}</span>
+      <span class="ttl">
+        <span class="nm">${c.title}</span>
+        <span class="wt">
+          ${c.q?`<span class="wtbar"><i style="width:${wt}%"></i></span>${c.q}問`:`<span class="wtbar"><i style="width:8%"></i></span>少なめ`}
+          ${c.q>=7?'<span class="heavy-tag">重点</span>':''}
+        </span>
+      </span>
+      <span class="state">
+        ${done?`<span class="scorechip">${sc}/${total}</span>`:''}
+        <span class="dot ${done?'done':(read?'read':'')}"></span>
+      </span>`;
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
+  updateOverall();
+}
+
+function updateOverall(){
+  // 進捗 = (読了 + クイズ合格) を全評価項目で正規化
+  let units=0, got=0;
+  CHAPTERS.forEach(c=>{
+    if(CONTENT[c.n]){ units++; if(store.get(KEY.read(c.n))==='1') got++; }
+    if(QUIZ[c.n]){ units++; const sc=store.get(KEY.score(c.n)); if(sc!==null && (+sc/QUIZ[c.n].length)>=0.7) got++; }
+  });
+  const pct = units? Math.round(got/units*100):0;
+  document.getElementById('overallPct').textContent = pct+'%';
+  document.getElementById('overallBar').style.width = pct+'%';
+}
+
+/* ============================================================
+   RENDER: main
+   ============================================================ */
+function render(){
+  renderSidebar();
+  const c = CHAPTERS.find(x=>x.n===current);
+  const m = document.getElementById('main');
+  const hasContent = !!CONTENT[c.n];
+  const hasQuiz = !!QUIZ[c.n];
+
+  let hero = `<div class="ch-hero">
+    <div class="eyebrow">第 ${c.n} 章</div>
+    <h2>${c.title}</h2>
+    <div class="meta">
+      ${c.q?`<span class="pill w">試験 約${c.q}問 / 40</span>`:`<span class="pill ${SUMMARY[c.n]&&SUMMARY[c.n].level==='low'?'':'w'}">${SUMMARY[c.n]?({high:'重点章',mid:'出題あり',low:'出題 少なめ'})[SUMMARY[c.n].level]:'出題 少なめ'}</span>`}
+      ${(c.n===4)?`<span class="pill g">第3版ギャップ: 特殊引数 /</span>`:''}
+      ${(c.n===7)?`<span class="pill g">第3版ギャップ: f-string</span>`:''}
+      ${(c.n===3)?`<span class="pill g">第3版ギャップ: f-string(→7章)</span>`:''}
+      ${(c.n===5)?`<span class="pill g">第3版ギャップ: 辞書の順序</span>`:''}
+      <span class="pill"><a href="${url9(c.slug)}" target="_blank" rel="noopener">公式3.9を開く ↗</a></span>
+    </div>
+  </div>`;
+
+  let tabs = `<div class="tabs">
+    <button class="tab ${tab==='read'?'active':''}" ${hasContent?'':'disabled style="opacity:.4;cursor:not-allowed"'} onclick="switchTab('read')">読む</button>
+    <button class="tab ${tab==='quiz'?'active':''}" ${hasQuiz?'':'disabled style="opacity:.4;cursor:not-allowed"'} onclick="switchTab('quiz')">練習問題${hasQuiz?`<span class="cnt">${QUIZ[c.n].length}</span>`:''}</button>
+    <button class="tab ${tab==='summary'?'active':''}" onclick="switchTab('summary')">まとめ</button>
+  </div>`;
+
+  let bodyHtml = '';
+  if(tab==='summary'){
+    bodyHtml = renderSummary(c);
+  }else if(tab==='read'){
+    bodyHtml = hasContent ? renderReader(c) : renderStub(c);
+  }else{
+    bodyHtml = hasQuiz ? renderQuiz(c) : renderStub(c);
+  }
+  m.innerHTML = hero + tabs + bodyHtml;
+
+  if(tab==='read' && hasContent){
+    // 読了マーク
+    store.set(KEY.read(c.n),'1');
+    updateOverall(); renderSidebar();
+  }
+  if(tab==='quiz' && hasQuiz){ bindQuiz(c); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderReader(c){
+  const data = CONTENT[c.n];
+  let html = '<div class="reader">';
+  data.secs.forEach(s=>{
+    html += `<div class="sec"><h3><span class="anchor">${s.a}</span>${s.h}</h3>`;
+    s.body.forEach(b=>{
+      if(b.t==='p') html += `<p>${b.x}</p>`;
+      else if(b.t==='code') html += `<pre><code>${fmtCode(b.x)}</code></pre>`;
+      else if(b.t==='gap') html += `<div class="gapcard"><span class="ic">!</span><div class="bd">${b.x}</div></div>`;
+    });
+    html += `</div>`;
+  });
+  html += summaryCardHtml(c, true);
+  html += `<div class="src">本文出典: <a href="${data.source}" target="_blank" rel="noopener">${data.source}</a> ・ © Python Software Foundation, PSF License v2</div>`;
+  html += '</div>';
+  return html;
+}
+
+const LEVEL = {high:{t:"配点：重点章",cls:"hi"}, mid:{t:"配点：そこそこ",cls:"mi"}, low:{t:"配点：低め",cls:"lo"}};
+function summaryCardHtml(c, atEnd){
+  const s = SUMMARY[c.n]; if(!s) return '';
+  const lv = LEVEL[s.level] || LEVEL.mid;
+  return `<div class="summary ${atEnd?'at-end':''}">
+    <div class="sm-head">
+      <span class="sm-title">この章のまとめ</span>
+      <span class="sm-level ${lv.cls}">${lv.t}</span>
+    </div>
+    <p class="sm-gist">${s.gist}</p>
+    <div class="sm-grid">
+      <div class="sm-col">
+        <div class="sm-lbl">要点</div>
+        <ul class="sm-list">${s.points.map(p=>`<li>${p.replace(/`([^`]+)`/g,'<code>$1</code>')}</li>`).join('')}</ul>
+      </div>
+      <div class="sm-col hot">
+        <div class="sm-lbl">★ 試験で出そうなポイント</div>
+        <ul class="sm-list">${s.hot.map(p=>`<li>${p.replace(/【([^】]+)】/g,'<b class="gapb">【$1】</b>').replace(/`([^`]+)`/g,'<code>$1</code>')}</li>`).join('')}</ul>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSummary(c){
+  const hasQuiz = !!QUIZ[c.n];
+  let html = '<div class="reader sm-only">';
+  html += summaryCardHtml(c, false);
+  // 関連リンク
+  html += `<div class="sm-actions">
+    ${CONTENT[c.n]?`<button class="sm-btn" onclick="switchTab('read')">本文を読む →</button>`:''}
+    ${hasQuiz?`<button class="sm-btn primary" onclick="switchTab('quiz')">練習問題を解く（${QUIZ[c.n].length}問）→</button>`:''}
+    <a class="sm-btn ghost" href="${url9(c.slug)}" target="_blank" rel="noopener">公式の第${c.n}章 ↗</a>
+  </div>`;
+  html += '</div>';
+  return html;
+}
+
+function renderStub(c){
+  return `<div class="stub">
+    <div class="big">この章の本文・問題は順次追加予定です</div>
+    <div>「<b>まとめ</b>」タブに、この章の要点と<b>試験で出そうなポイント</b>を用意しています。<br>本文は公式ページ（日本語・3.9）で読めます。</div>
+    <a class="btn" href="${url9(c.slug)}" target="_blank" rel="noopener">公式の第${c.n}章を開く ↗</a>
+  </div>`;
+}
+
+function renderQuiz(c){
+  const qs = QUIZ[c.n];
+  let html = '<div class="quizwrap">';
+  qs.forEach((item,i)=>{
+    html += `<div class="q" data-qi="${i}">
+      <div class="qhead"><span class="qn">Q${i+1}</span><span class="qprompt">${item.q}</span></div>
+      ${item.code?`<pre><code>${fmtCode(item.code)}</code></pre>`:''}
+      <div class="opts">
+        ${item.opts.map((o,oi)=>`<button class="opt" data-oi="${oi}">
+            <span class="mk">${String.fromCharCode(65+oi)}</span>
+            <span class="otx">${o.replace(/`([^`]+)`/g,'<code>$1</code>')}</span>
+          </button>`).join('')}
+      </div>
+      <div class="explain"><b>解説:</b> ${item.ex}</div>
+    </div>`;
+  });
+  html += '</div>';
+  html += `<div class="quizbar">
+      <span class="scoretxt">スコア <b id="qScore">0</b> / ${qs.length}</span>
+      <span class="pass" id="qPass" style="display:none"></span>
+      <span class="sp"></span>
+      <button id="qReveal">答えを全部見る</button>
+      <button class="primary" id="qRetry">もう一度</button>
+    </div>`;
+  return html;
+}
+
+/* ============================================================
+   QUIZ logic
+   ============================================================ */
+function bindQuiz(c){
+  const qs = QUIZ[c.n];
+  const answered = new Array(qs.length).fill(-1); // 選んだindex
+  let score = 0;
+
+  document.querySelectorAll('.q').forEach(qEl=>{
+    const qi = +qEl.dataset.qi;
+    const correct = qs[qi].correct;
+    const opts = qEl.querySelectorAll('.opt');
+    opts.forEach(opt=>{
+      opt.addEventListener('click',()=>{
+        if(answered[qi]!==-1) return;        // 1問1回
+        const oi = +opt.dataset.oi;
+        answered[qi]=oi;
+        opts.forEach(o=>o.disabled=true);
+        opts[correct].classList.add('correct');
+        if(oi!==correct) opt.classList.add('wrong');
+        else score++;
+        qEl.querySelector('.explain').classList.add('show');
+        updateQuizBar();
+      });
+    });
+  });
+
+  function updateQuizBar(){
+    const done = answered.filter(a=>a!==-1).length;
+    document.getElementById('qScore').textContent = score;
+    if(done===qs.length){
+      store.set(KEY.score(c.n), String(score));
+      const ratio = score/qs.length;
+      const pass = document.getElementById('qPass');
+      pass.style.display='inline-block';
+      pass.className = 'pass '+(ratio>=0.7?'ok':'no');
+      pass.textContent = ratio>=0.7? `合格ライン到達 (${Math.round(ratio*100)}%)` : `あと一歩 (${Math.round(ratio*100)}%)`;
+      updateOverall(); renderSidebar();
+    }
+  }
+
+  document.getElementById('qReveal').onclick = ()=>{
+    document.querySelectorAll('.q').forEach(qEl=>{
+      const qi=+qEl.dataset.qi; if(answered[qi]!==-1) return;
+      const correct=qs[qi].correct; const opts=qEl.querySelectorAll('.opt');
+      answered[qi]=correct; opts.forEach(o=>o.disabled=true);
+      opts[correct].classList.add('correct');
+      qEl.querySelector('.explain').classList.add('show');
+    });
+    updateQuizBar();
+  };
+  document.getElementById('qRetry').onclick = ()=>{ render(); };
+}
+
+/* ============================================================
+   UI wiring
+   ============================================================ */
+function switchTab(t){ tab=t; render(); }
+function closeNav(){ document.body.classList.remove('nav-open'); }
+document.getElementById('menuBtn').onclick=()=>document.body.classList.toggle('nav-open');
+document.getElementById('scrim').onclick=closeNav;
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('学習の進捗・スコアをすべて消去しますか？')){ store.clearAll(); tab='read'; render(); }
+};
+
+render();
+</script>
+</body>
+</html>
