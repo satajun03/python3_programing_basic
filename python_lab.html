@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 演習ラボ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f2ec; --paper2:#eceae1; --card:#fbfaf6; --ink:#151a21; --ink2:#2b333d;
+    --line:#d9d5c8; --muted:#6f6a5c; --jade:#127a5c; --jade-d:#0d5f47; --jade-l:#e3f0ea;
+    --amber:#c47d1e; --red:#c0453b; --red-l:#f7e6e4; --green-l:#e4f2e8;
+    --code-bg:#12161d; --code-fg:#e6e9ef; --code-line:#242c37;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif; color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:26px 26px;
+    background-position:-1px -1px;
+    line-height:1.6;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 18px 60px}
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:18px}
+  .brand h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.9rem;margin:0;letter-spacing:-.02em}
+  .brand .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
+  .brand .tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.7rem;
+    background:var(--ink);color:var(--paper);padding:2px 8px;border-radius:3px;margin-bottom:6px;letter-spacing:.03em}
+  .progress{text-align:right;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);min-width:120px}
+  .progress .num{font-size:1.5rem;color:var(--jade);font-weight:700;display:block;line-height:1.1}
+
+  .status{font-family:'JetBrains Mono',monospace;font-size:.78rem;padding:8px 12px;border-radius:5px;
+    background:var(--paper2);border:1px solid var(--line);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .status .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);flex:none}
+  .status.ready .dot{background:var(--jade)}
+  .status.err .dot{background:var(--red)}
+
+  /* chapter chips */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:.78rem;padding:6px 11px;border-radius:20px;
+    border:1px solid var(--line);background:var(--card);cursor:pointer;color:var(--ink2);white-space:nowrap;
+    transition:all .12s}
+  .chip:hover{border-color:var(--jade)}
+  .chip.active{background:var(--jade);color:#fff;border-color:var(--jade)}
+  .chip .c{opacity:.6;margin-left:5px}
+  .chip.active .c{opacity:.85}
+
+  /* exercise pills */
+  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+  .pill{font-size:.82rem;padding:5px 12px;border-radius:5px;border:1px solid var(--line);
+    background:var(--card);cursor:pointer;transition:all .12s;position:relative}
+  .pill:hover{border-color:var(--jade)}
+  .pill.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .pill.done::before{content:"✓";color:var(--jade);font-weight:700;margin-right:5px}
+  .pill.active.done::before{color:#6ee7b7}
+
+  /* workspace */
+  .ws{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  @media(max-width:860px){.ws{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .panel .phead{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);padding:9px 14px;border-bottom:1px solid var(--line);background:var(--paper2)}
+  .pbody{padding:16px}
+  .task-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.15rem;margin:0 0 8px}
+  .task-prompt{font-size:.95rem;color:var(--ink2)}
+  .task-prompt code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:var(--paper2);padding:1px 5px;border-radius:3px}
+  .reveal{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  .reveal summary{cursor:pointer;font-size:.85rem;color:var(--jade-d);font-weight:600;font-family:'JetBrains Mono',monospace}
+  .reveal pre{background:var(--code-bg);color:var(--code-fg);border-radius:6px;padding:12px;overflow-x:auto;
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.5;margin:10px 0 8px}
+  .reveal .why{font-size:.88rem;color:var(--ink2);background:var(--jade-l);border-left:3px solid var(--jade);
+    padding:8px 12px;border-radius:0 5px 5px 0}
+
+  /* editor */
+  .editor-wrap{background:var(--code-bg);border-radius:8px;border:1px solid var(--code-line);overflow:hidden}
+  .ed-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--code-line)}
+  .ed-head .lbl{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#8b95a5;letter-spacing:.05em}
+  .ed-head .kbd{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#5f6a7a}
+  textarea#code{width:100%;min-height:230px;border:0;outline:0;resize:vertical;background:var(--code-bg);
+    color:var(--code-fg);font-family:'JetBrains Mono',monospace;font-size:.88rem;line-height:1.6;padding:14px;
+    tab-size:4;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+  .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  button{font-family:'Inter',sans-serif;font-weight:600;font-size:.9rem;padding:9px 18px;border-radius:6px;
+    border:1px solid transparent;cursor:pointer;transition:all .12s}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .btn-run{background:var(--jade);color:#fff}
+  .btn-run:hover:not(:disabled){background:var(--jade-d)}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink2)}
+  .btn-ghost:hover:not(:disabled){border-color:var(--ink2)}
+
+  /* console */
+  .console{margin-top:12px;background:var(--code-bg);border:1px solid var(--code-line);border-radius:8px;overflow:hidden}
+  .console .chead{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--code-line)}
+  .console .chead .lbl{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#8b95a5;letter-spacing:.06em}
+  .verdict{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;padding:2px 9px;border-radius:4px}
+  .verdict.ok{background:var(--green-l);color:var(--jade-d)}
+  .verdict.no{background:var(--red-l);color:var(--red)}
+  pre#out{margin:0;padding:13px;font-family:'JetBrains Mono',monospace;font-size:.84rem;line-height:1.55;
+    color:var(--code-fg);white-space:pre-wrap;word-break:break-word;min-height:44px;max-height:280px;overflow:auto}
+  pre#out .err{color:#ff8a80}
+  pre#out .placeholder{color:#5f6a7a}
+
+  footer{margin-top:32px;text-align:center;color:var(--muted);font-size:.78rem;font-family:'JetBrains Mono',monospace}
+  a{color:var(--jade-d)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="tag">PYODIDE // 本物のPythonが動く</span>
+      <h1>Python 演習ラボ</h1>
+      <div class="sub">書いて → 実行して → 覚える。基礎試験の文法を手を動かして固める。</div>
+    </div>
+    <div class="progress">
+      <span class="num" id="pnum">0</span>
+      <span id="ptot">/ 0 問クリア</span>
+    </div>
+  </header>
+
+  <div class="status" id="status"><span class="dot"></span><span id="statusText">Python エンジンを起動中… (初回は10〜20秒かかります)</span></div>
+
+  <div class="chips" id="chips"></div>
+  <div class="pills" id="pills"></div>
+
+  <div class="ws">
+    <div>
+      <div class="panel">
+        <div class="phead">課題</div>
+        <div class="pbody">
+          <h2 class="task-title" id="taskTitle">—</h2>
+          <div class="task-prompt" id="taskPrompt"></div>
+          <details class="reveal" id="revealBox">
+            <summary>ヒント・模範解答を見る</summary>
+            <pre id="solCode"></pre>
+            <div class="why" id="solWhy"></div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="editor-wrap">
+        <div class="ed-head">
+          <span class="lbl">code.py</span>
+          <span class="kbd">Ctrl/⌘ + Enter で実行</span>
+        </div>
+        <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      </div>
+      <div class="btns">
+        <button class="btn-run" id="btnRun" disabled>▶ 実行して採点</button>
+        <button class="btn-ghost" id="btnReset">リセット</button>
+      </div>
+      <div class="console">
+        <div class="chead">
+          <span class="lbl">OUTPUT</span>
+          <span id="verdict"></span>
+        </div>
+        <pre id="out"><span class="placeholder">ここに実行結果が表示されます。</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <footer>Python 演習ラボ · ブラウザ内で本物のPython(3.x)を実行 · 進捗はこの端末に保存されます</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+/* ---------------- 演習データ ---------------- */
+const EXERCISES = [
+  // 3章
+  {id:"c3a",ch:"3章 入門",title:"電卓で計算",prompt:"<code>17 × 3</code> から <code>5</code> を引いた数を print してください。",starter:"",expected:"46",
+   solution:"print(17 * 3 - 5)",why:"算術演算子の優先順位で <code>*</code> は <code>-</code> より先に計算されます。"},
+  {id:"c3b",ch:"3章 入門",title:"文字列の繰り返し",prompt:"文字列 <code>'ab'</code> を 3 回繰り返した <code>ababab</code> を print してください。",starter:"",expected:"ababab",
+   solution:"print('ab' * 3)",why:"<code>文字列 * 整数</code> で繰り返しになります。"},
+  {id:"c3c",ch:"3章 入門",title:"スライス",prompt:"<code>s = 'Python'</code> の 2〜4文字目 <code>yth</code> を取り出して print してください。（ヒント: スライス）",starter:"s = 'Python'\n",expected:"yth",
+   solution:"s = 'Python'\nprint(s[1:4])",why:"<code>s[1:4]</code> は添字1以上4未満。先頭は0始まりなので y(1) t(2) h(3)。"},
+  // 4章
+  {id:"c4a",ch:"4章 制御フロー",title:"range で連番",prompt:"1 から 5 までを1行ずつ print してください。",starter:"",expected:"1\n2\n3\n4\n5",
+   solution:"for i in range(1, 6):\n    print(i)",why:"<code>range(1, 6)</code> は1以上6未満＝1..5。終端は含まれません。"},
+  {id:"c4b",ch:"4章 制御フロー",title:"偶数判定の関数",prompt:"引数が偶数なら True を返す関数 <code>is_even</code> を定義し、<code>is_even(4)</code> と <code>is_even(7)</code> をこの順で print してください。",starter:"",expected:"True\nFalse",
+   solution:"def is_even(n):\n    return n % 2 == 0\nprint(is_even(4))\nprint(is_even(7))",why:"<code>%</code> は余り。偶数は2で割った余りが0です。"},
+  {id:"c4c",ch:"4章 制御フロー",title:"デフォルト引数",prompt:"<code>greet(name, msg='Hi')</code> を定義し、<code>greet('Sara')</code> を呼ぶと <code>Hi Sara</code> と出るようにしてください。",starter:"",expected:"Hi Sara",
+   solution:"def greet(name, msg='Hi'):\n    print(msg, name)\ngreet('Sara')",why:"デフォルト引数は省略時に使われます。print の <code>,</code> は空白区切りで出力。"},
+  {id:"c4d",ch:"4章 制御フロー",title:"可変長引数",prompt:"任意個の数を受け取り合計を返す関数 <code>total</code> を定義し、<code>total(1, 2, 3)</code> の結果を print してください。",starter:"",expected:"6",
+   solution:"def total(*nums):\n    return sum(nums)\nprint(total(1, 2, 3))",why:"<code>*nums</code> は複数の引数をタプルにまとめて受け取ります。"},
+  // 5章
+  {id:"c5a",ch:"5章 データ構造",title:"リスト内包（偶数）",prompt:"0〜9のうち偶数だけのリスト <code>[0, 2, 4, 6, 8]</code> をリスト内包表記で作って print してください。",starter:"",expected:"[0, 2, 4, 6, 8]",
+   solution:"print([x for x in range(10) if x % 2 == 0])",why:"リスト内包: <code>[式 for 変数 in 範囲 if 条件]</code>。"},
+  {id:"c5b",ch:"5章 データ構造",title:"辞書アクセス",prompt:"<code>d = {'a': 1, 'b': 2}</code> のキー <code>'b'</code> の値を print してください。",starter:"d = {'a': 1, 'b': 2}\n",expected:"2",
+   solution:"d = {'a': 1, 'b': 2}\nprint(d['b'])",why:"辞書はキーでアクセスします。数値の添字ではなくキー名で引きます。"},
+  {id:"c5c",ch:"5章 データ構造",title:"重複除去して並べ替え",prompt:"リスト <code>[3, 1, 2, 2, 3]</code> から重複を除き、昇順に並べた <code>[1, 2, 3]</code> を print してください。（ヒント: set と sorted）",starter:"",expected:"[1, 2, 3]",
+   solution:"print(sorted(set([3, 1, 2, 2, 3])))",why:"set で重複除去 → sorted で昇順のリストに変換。"},
+  {id:"c5d",ch:"5章 データ構造",title:"タプルのアンパック",prompt:"<code>a, b</code> にタプル <code>(10, 20)</code> をアンパック代入し、<code>a + b</code> の結果を print してください。",starter:"",expected:"30",
+   solution:"a, b = (10, 20)\nprint(a + b)",why:"アンパックは左辺の変数に順に配ります。a=10, b=20。"},
+  {id:"c5e",ch:"5章 データ構造",title:"リストの並べ替え",prompt:"<code>nums = [3, 1, 2]</code> を昇順に並べ替えて print してください。（ヒント: sort）",starter:"nums = [3, 1, 2]\n",expected:"[1, 2, 3]",
+   solution:"nums = [3, 1, 2]\nnums.sort()\nprint(nums)",why:"<code>sort()</code> はその場で並べ替え、返り値は None です。"},
+  // 6章
+  {id:"c6a",ch:"6章 モジュール",title:"math を使う",prompt:"16 の平方根を print してください。（ヒント: math.sqrt）",starter:"",expected:"4.0",
+   solution:"import math\nprint(math.sqrt(16))",why:"<code>import math</code> して <code>math.sqrt</code>。結果は float なので 4.0。"},
+  {id:"c6b",ch:"6章 モジュール",title:"from import",prompt:"math から <code>pi</code> を import し、小数第2位に丸めた <code>3.14</code> を print してください。",starter:"",expected:"3.14",
+   solution:"from math import pi\nprint(round(pi, 2))",why:"<code>from math import pi</code> で pi を直接使えます。round(x, 2) で丸め。"},
+  // 7章
+  {id:"c7a",ch:"7章 入出力",title:"f-string",prompt:"<code>name = 'Sara'</code> を使い、f-string で <code>Hi Sara</code> を print してください。",starter:"name = 'Sara'\n",expected:"Hi Sara",
+   solution:"name = 'Sara'\nprint(f'Hi {name}')",why:"f-string は <code>f'...{変数}...'</code> で値を埋め込みます（3.6以降）。"},
+  {id:"c7b",ch:"7章 入出力",title:"桁揃え",prompt:"数値 7 を幅3で右寄せした <code>  7</code>（前に空白2つ）を f-string で print してください。",starter:"",expected:"  7",
+   solution:"print(f'{7:3}')",why:"<code>{値:3}</code> は最小幅3で右寄せ表示します。"},
+  {id:"c7c",ch:"7章 入出力",title:"小数の書式",prompt:"<code>3.14159</code> を小数第2位まで（<code>3.14</code>）で print してください。",starter:"",expected:"3.14",
+   solution:"print(f'{3.14159:.2f}')",why:"<code>{値:.2f}</code> は小数点以下2桁の固定小数点表示。"},
+  // 8章
+  {id:"c8a",ch:"8章 例外",title:"例外をキャッチ",prompt:"<code>10 / 0</code> を try で実行し、ZeroDivisionError を except で捕まえて <code>error</code> と print してください。",starter:"",expected:"error",
+   solution:"try:\n    10 / 0\nexcept ZeroDivisionError:\n    print('error')",why:"try で危険な処理、except で対応。ゼロ除算は ZeroDivisionError。"},
+  {id:"c8b",ch:"8章 例外",title:"finally",prompt:"try で <code>A</code> を print、finally で <code>B</code> を print してください（出力は A→B の順）。",starter:"",expected:"A\nB",
+   solution:"try:\n    print('A')\nfinally:\n    print('B')",why:"finally は例外の有無に関わらず必ず最後に実行されます。"},
+  // 9章
+  {id:"c9a",ch:"9章 クラス",title:"クラス定義",prompt:"名前を持つ <code>Dog</code> クラスを定義してください。<code>__init__</code> で name を受け取り、<code>bark()</code> は <code>'Woof'</code> を返します。<code>d = Dog('Pochi')</code> を作り、<code>d.name</code> と <code>d.bark()</code> をこの順で print してください。",starter:"",expected:"Pochi\nWoof",
+   solution:"class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return 'Woof'\nd = Dog('Pochi')\nprint(d.name)\nprint(d.bark())",why:"<code>__init__</code> は初期化メソッド。<code>self</code> はインスタンス自身を指します。"},
+  {id:"c9b",ch:"9章 クラス",title:"クラス変数",prompt:"<code>Animal</code> クラスにクラス変数 <code>species = 'Mammal'</code> を定義し、<code>a = Animal()</code> を作って <code>a.species</code> を print してください。",starter:"",expected:"Mammal",
+   solution:"class Animal:\n    species = 'Mammal'\na = Animal()\nprint(a.species)",why:"クラス変数はインスタンス経由でも読めます（自分が持たなければクラスのを見る）。"},
+  // 10章
+  {id:"c10a",ch:"10章 標準ライブラリ",title:"statistics で平均",prompt:"<code>[1, 2, 3, 4]</code> の平均値 <code>2.5</code> を print してください。（ヒント: statistics.mean）",starter:"",expected:"2.5",
+   solution:"from statistics import mean\nprint(mean([1, 2, 3, 4]))",why:"標準ライブラリ statistics の mean。平均を計算します。"},
+  {id:"c10b",ch:"10章 標準ライブラリ",title:"json 変換",prompt:"リスト <code>[1, 2, 3]</code> を JSON 文字列 <code>[1, 2, 3]</code> に変換して print してください。（ヒント: json.dumps）",starter:"",expected:"[1, 2, 3]",
+   solution:"import json\nprint(json.dumps([1, 2, 3]))",why:"<code>json.dumps</code> は Python オブジェクト → JSON 文字列に変換します。"},
+  // 11章
+  {id:"c11a",ch:"11章 標準ライブラリ2",title:"decimal で正確な計算",prompt:"Decimal を使い <code>0.1 + 0.2</code> を正確に計算して <code>0.3</code> を print してください。（数値は文字列で渡すこと）",starter:"",expected:"0.3",
+   solution:"from decimal import Decimal\nprint(Decimal('0.1') + Decimal('0.2'))",why:"float だと 0.30000…4 という誤差が出ます。decimal で正確に。文字列で渡すのがコツ。"},
+  {id:"c11b",ch:"11章 標準ライブラリ2",title:"Counter で数える",prompt:"文字列 <code>'aab'</code> の中の <code>'a'</code> の出現回数 <code>2</code> を print してください。（ヒント: collections.Counter）",starter:"",expected:"2",
+   solution:"from collections import Counter\nprint(Counter('aab')['a'])",why:"Counter は要素の出現回数を数える辞書風オブジェクトです。"},
+  // 自由実行
+  {id:"free",ch:"自由実行",title:"自由に書いて試す",prompt:"採点なしのスクラッチ領域です。気になった文法をここで自由に書いて実行し、挙動を確かめましょう。<br><br>例: <code>t = (1, 2); t = [1, 2]; print(type(t))</code> のように「型が途中で変わる」動きを実験してみるのもおすすめ。",starter:"# 自由に書いて ▶ 実行\nx = [1, 2, 3]\nx.append(4)\nprint(x)\n",expected:null,
+   solution:"# 決まった答えはありません。\n# 気になるコードを書いて挙動を確認しましょう。",why:"この領域は採点しません。エラーの出方や型の変化など、手を動かして確かめるのが理解への近道です。"},
+];
+
+/* ---------------- 状態 ---------------- */
+let pyodide=null, ready=false;
+let activeChapter=null, activeId=null;
+let solved=new Set();
+try{ const s=localStorage.getItem('pylab_solved'); if(s) solved=new Set(JSON.parse(s)); }catch(e){}
+const gradable = EXERCISES.filter(e=>e.expected!==null);
+
+function saveSolved(){ try{ localStorage.setItem('pylab_solved', JSON.stringify([...solved])); }catch(e){} }
+
+/* ---------------- DOM ---------------- */
+const $=id=>document.getElementById(id);
+const chapters=[...new Set(EXERCISES.map(e=>e.ch))];
+
+function renderChips(){
+  $('chips').innerHTML='';
+  chapters.forEach(ch=>{
+    const items=EXERCISES.filter(e=>e.ch===ch);
+    const done=items.filter(e=>solved.has(e.id)&&e.expected!==null).length;
+    const total=items.filter(e=>e.expected!==null).length;
+    const el=document.createElement('div');
+    el.className='chip'+(ch===activeChapter?' active':'');
+    el.innerHTML=ch+(total?`<span class="c">${done}/${total}</span>`:'');
+    el.onclick=()=>{ activeChapter=ch; activeId=items[0].id; renderAll(); };
+    $('chips').appendChild(el);
+  });
+}
+function renderPills(){
+  $('pills').innerHTML='';
+  EXERCISES.filter(e=>e.ch===activeChapter).forEach(e=>{
+    const el=document.createElement('div');
+    el.className='pill'+(e.id===activeId?' active':'')+(solved.has(e.id)?' done':'');
+    el.textContent=e.title;
+    el.onclick=()=>{ activeId=e.id; renderAll(); };
+    $('pills').appendChild(el);
+  });
+}
+function renderTask(){
+  const e=EXERCISES.find(x=>x.id===activeId);
+  $('taskTitle').textContent=e.title;
+  $('taskPrompt').innerHTML=e.prompt;
+  $('solCode').textContent=e.solution;
+  $('solWhy').innerHTML=e.why;
+  $('revealBox').open=false;
+  $('code').value=e.starter||'';
+  $('out').innerHTML='<span class="placeholder">ここに実行結果が表示されます。</span>';
+  $('verdict').textContent='';
+  $('verdict').className='';
+}
+function renderProgress(){
+  $('pnum').textContent=solved.size;
+  $('ptot').textContent=`/ ${gradable.length} 問クリア`;
+}
+function renderAll(){ renderChips(); renderPills(); renderTask(); renderProgress(); }
+
+/* ---------------- Pyodide ---------------- */
+async function initPy(){
+  try{
+    pyodide=await loadPyodide();
+    ready=true;
+    $('status').className='status ready';
+    $('statusText').textContent='準備完了。課題を選んでコードを書き、▶ 実行して採点 を押してください。';
+    $('btnRun').disabled=false;
+  }catch(err){
+    $('status').className='status err';
+    $('statusText').textContent='Pythonエンジンの読み込みに失敗しました。ネット接続を確認してページを再読み込みしてください。';
+  }
+}
+
+async function runCode(){
+  if(!ready) return;
+  const e=EXERCISES.find(x=>x.id===activeId);
+  const code=$('code').value;
+  $('btnRun').disabled=true;
+  $('out').innerHTML='<span class="placeholder">実行中…</span>';
+  $('verdict').textContent=''; $('verdict').className='';
+  pyodide.globals.set('user_code', code);
+  const runner=`
+import sys, io, traceback
+_buf = io.StringIO()
+_o, _e = sys.stdout, sys.stderr
+sys.stdout = _buf; sys.stderr = _buf
+def _no_input(*a, **k):
+    raise RuntimeError("この演習環境では input() は使えません。値を直接コードに書いてください。")
+_g = {"__name__": "__main__", "input": _no_input}
+try:
+    exec(user_code, _g)
+except Exception:
+    traceback.print_exc()
+finally:
+    sys.stdout, sys.stderr = _o, _e
+_buf.getvalue()
+`;
+  let output='';
+  try{ output=await pyodide.runPythonAsync(runner); }
+  catch(err){ output='実行エラー: '+err; }
+  const norm=s=>String(s).replace(/\s+$/,'');
+  const hasErr=/Traceback|Error|実行エラー/.test(output);
+  $('out').innerHTML = output.trim()==='' ?
+      '<span class="placeholder">(出力なし)</span>' :
+      (hasErr?'<span class="err"></span>':'')+escapeHtml(output);
+  if(hasErr){ const s=$('out').querySelector('.err'); if(s){s.textContent=output; $('out').innerHTML=''; $('out').appendChild(s);} }
+
+  if(e.expected!==null){
+    if(norm(output)===norm(e.expected)){
+      $('verdict').textContent='✓ 正解'; $('verdict').className='verdict ok';
+      if(!solved.has(e.id)){ solved.add(e.id); saveSolved(); renderChips(); renderPills(); renderProgress(); }
+    }else{
+      $('verdict').textContent='✗ もう一度'; $('verdict').className='verdict no';
+    }
+  }
+  $('btnRun').disabled=false;
+}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ---------------- events ---------------- */
+$('btnRun').onclick=runCode;
+$('btnReset').onclick=()=>{ const e=EXERCISES.find(x=>x.id===activeId); $('code').value=e.starter||''; $('out').innerHTML='<span class="placeholder">ここに実行結果が表示されます。</span>'; $('verdict').textContent=''; $('verdict').className=''; };
+$('code').addEventListener('keydown',ev=>{
+  if(ev.key==='Tab'){ ev.preventDefault(); const t=ev.target,s=t.selectionStart,en=t.selectionEnd;
+    t.value=t.value.slice(0,s)+'    '+t.value.slice(en); t.selectionStart=t.selectionEnd=s+4; }
+  if((ev.ctrlKey||ev.metaKey)&&ev.key==='Enter'){ ev.preventDefault(); runCode(); }
+});
+
+/* ---------------- start ---------------- */
+activeChapter=chapters[0]; activeId=EXERCISES[0].id;
+renderAll();
+initPy();
+</script>
+</body>
+</html>
